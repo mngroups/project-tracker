@@ -11,13 +11,16 @@ import {
   taskResponseSchema,
 } from "../schema";
 
-/** `is_internal` is sent only when given: a viewer who cannot see it must not overwrite it. */
-const toBody = (values: Partial<TaskFormValues>) =>
-  JSON.stringify({
-    ...values,
-    assignee_name: values.assignee_name ? values.assignee_name : null,
-    due_date: values.due_date ? values.due_date : null,
-  });
+/**
+ * Optional keys are sent only when given (`undefined` means "leave alone", so a partial update
+ * never wipes a field). An emptied form field (`""`) becomes an explicit `null`.
+ */
+const toBody = (values: Partial<TaskFormValues>) => {
+  const body: Record<string, unknown> = { ...values };
+  if (values.assignee_name !== undefined) body.assignee_name = values.assignee_name || null;
+  if (values.due_date !== undefined) body.due_date = values.due_date || null;
+  return JSON.stringify(body);
+};
 
 async function send(path: string, method: string, body: string): Promise<Task> {
   const res = await apiClient(path, { method, body }, taskResponseSchema);

@@ -60,4 +60,15 @@ describe("task actions", () => {
     const body = JSON.parse(apiClient.mock.calls[0][1].body);
     expect(body).toEqual({ title: "T", assignee_name: null, due_date: null });
   });
+
+  it("keeps a partial update partial but still sends an explicit clear", async () => {
+    apiClient.mockResolvedValue({ success: true, data: {} });
+    await tasks.updateTaskAction("p1", "t1", { title: "Baru" });
+    expect(JSON.parse(apiClient.mock.calls[0][1].body)).toEqual({ title: "Baru" });
+    await tasks.updateTaskAction("p1", "t1", { assignee_name: "", due_date: "" });
+    expect(JSON.parse(apiClient.mock.calls[1][1].body)).toEqual({
+      assignee_name: null,
+      due_date: null,
+    });
+  });
 });

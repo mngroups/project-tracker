@@ -23,6 +23,8 @@ export function ApprovalModal({ project }: { project: Project }) {
   const milestone = project.milestones.find((m) => m.id === modal?.target);
   const approve = useApproveMilestone(project.id);
   const requestChanges = useRequestMilestoneChanges(project.id);
+  // A stale link or a concurrent decision must not allow deciding again.
+  const decidable = milestone?.status === "awaiting_approval";
   const pending = approve.isPending || requestChanges.isPending;
 
   const form = useForm<ApprovalFormValues>({
@@ -47,7 +49,7 @@ export function ApprovalModal({ project }: { project: Project }) {
 
   const decide = (kind: "approve" | "revise") =>
     form.handleSubmit(({ note }) => {
-      if (!milestone) return;
+      if (!milestone || !decidable) return;
       if (kind === "revise" && !note) {
         form.setError("note", { message: "Catatan revisi wajib diisi" });
         return;
@@ -87,7 +89,7 @@ export function ApprovalModal({ project }: { project: Project }) {
               type="button"
               variant="outline"
               className="min-h-10"
-              disabled={pending}
+              disabled={pending || !decidable}
               onClick={() => decide("revise")}
             >
               {requestChanges.isPending && <Loader2 className="animate-spin" />}
@@ -96,7 +98,7 @@ export function ApprovalModal({ project }: { project: Project }) {
             <Button
               type="button"
               className="min-h-10"
-              disabled={pending}
+              disabled={pending || !decidable}
               onClick={() => decide("approve")}
             >
               {approve.isPending && <Loader2 className="animate-spin" />}

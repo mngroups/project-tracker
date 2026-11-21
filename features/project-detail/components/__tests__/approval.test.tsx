@@ -179,4 +179,12 @@ describe("client approval", () => {
     expect(row).toContainElement(within(modal).getByRole("button", { name: "Minta revisi" }));
     expect(row?.className).toContain("max-md:sticky");
   });
+
+  it("disables both buttons when the milestone is not awaiting approval", async () => {
+    window.history.replaceState(null, "", "/?tab=milestone&modal=approval&target=m1");
+    renderPage();
+    const modal = await screen.findByTestId("approval-modal");
+    expect(within(modal).getByRole("button", { name: "Setujui" })).toBeDisabled();
+    expect(within(modal).getByRole("button", { name: "Minta revisi" })).toBeDisabled();
+  });
 });
