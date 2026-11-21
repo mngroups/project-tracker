@@ -29,7 +29,7 @@ What you get out of the box:
 
 The backend lives in `../project-tracker-api`.
 
-1. In the API repo: `pnpm dev:issuer` (dev auth on :9000), then Postgres + MinIO
+1. In the API repo: `pnpm dev:issuer` (dev auth on :9000), then Postgres + RustFS storage
    (`docker compose up -d`), `pnpm db:migrate` and `pnpm dev` (API on :8080). See its README.
 2. Here: `.env.local` with `API_BASE_URL=http://localhost:8080`, then `pnpm dev`.
 3. Log in as `pm` / `pm123` (Project Manager), `member` / `member123` (Team Member) or
