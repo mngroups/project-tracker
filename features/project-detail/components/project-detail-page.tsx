@@ -2,10 +2,13 @@
 
 import { ApiError } from "@mono/auth";
 import { useCan } from "@mono/auth/react";
+import { useModalParam } from "@mono/hooks/next";
 import { Button, TableEmptyState } from "@mono/ui";
 import Link from "next/link";
 import { ProjectFormModal } from "@/features/projects/components/project-form-modal";
 import { useProject } from "@/features/projects/hooks/use-projects";
+import { ApprovalBanner } from "./approval-banner";
+import { APPROVAL_MODAL, ApprovalModal } from "./approval-modal";
 import { MilestonesTab } from "./milestones-tab";
 import { OverviewTab } from "./overview-tab";
 import { ProjectDetailSkeleton } from "./project-detail-skeleton";
@@ -16,6 +19,8 @@ export function ProjectDetailPage({ id }: { id: string }) {
   const { data: project, isLoading, isError, error, refetch } = useProject(id);
   const [tab, setTab] = useProjectTab();
   const canManage = useCan("project:manage");
+  const canApprove = useCan("project.milestone:approve");
+  const { openModal } = useModalParam([APPROVAL_MODAL] as const);
 
   if (isLoading) return <ProjectDetailSkeleton />;
 
@@ -43,12 +48,29 @@ export function ProjectDetailPage({ id }: { id: string }) {
   return (
     <div className="min-w-0 space-y-4">
       <ProjectHeader project={project} />
+      <ApprovalBanner project={project} onShowMilestones={setTab} />
       <ProjectTabs value={tab} onChange={setTab} />
       {tab === "ringkasan" && <OverviewTab project={project} />}
-      {tab === "milestone" && <MilestonesTab project={project} />}
+      {tab === "milestone" && (
+        <MilestonesTab
+          project={project}
+          renderMilestoneActions={(m) =>
+            canApprove && m.status === "awaiting_approval" ? (
+              <Button
+                className="min-h-10"
+                aria-label={`Tinjau ${m.title}`}
+                onClick={() => openModal(APPROVAL_MODAL, m.id)}
+              >
+                Tinjau
+              </Button>
+            ) : null
+          }
+        />
+      )}
       {tab === "file" && (
         <p className="py-6 text-center text-sm text-muted-foreground">Belum ada file</p>
       )}
+      {canApprove && <ApprovalModal project={project} />}
       {canManage && <ProjectFormModal mode="edit" project={project} />}
     </div>
   );
