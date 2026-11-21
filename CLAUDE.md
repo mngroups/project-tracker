@@ -1,8 +1,8 @@
-# Monexa App — Agent Instruction Guide
+# Project Tracker — Agent Instruction Guide
 
 ## Project Overview
 
-Next.js 16 (App Router, Turbopack) frontend created from the Monexa app template. React 19, TypeScript, Tailwind CSS v4, [Biome](https://biomejs.dev) for lint + format, the **MoNo design system** (`@mono/ui`, shadcn/ui + Radix + Tailwind v4), `@mono/hooks`, `@mono/utils`, `@mono/auth` (session, API client, RBAC), [TanStack Query](https://tanstack.com/query) v5 for server state, [Zustand](https://github.com/pmndrs/zustand) for client state, [Zod](https://zod.dev) v4, [react-hook-form](https://react-hook-form.com), [Vitest](https://vitest.dev) + React Testing Library.
+Next.js 16 (App Router, Turbopack) frontend created from the Monexa app template: the client-facing project tracker (projects, milestones, tasks, files). React 19, TypeScript, Tailwind CSS v4, [Biome](https://biomejs.dev) for lint + format, the **MoNo design system** (`@mono/ui`, shadcn/ui + Radix + Tailwind v4), `@mono/hooks`, `@mono/utils`, `@mono/auth` (session, API client, RBAC), [TanStack Query](https://tanstack.com/query) v5 for server state, [Zustand](https://github.com/pmndrs/zustand) for client state, [Zod](https://zod.dev) v4, [react-hook-form](https://react-hook-form.com), [Vitest](https://vitest.dev) + React Testing Library.
 
 **Package manager:** `pnpm@10.33.0` (lockfile committed; do **not** mix in npm/yarn).
 **Node:** 24.22.1 (`.nvmrc`, `engines`, the Dockerfile and CI via `node-version-file`; bump all of them together).
@@ -231,7 +231,7 @@ Trunk-based: unfinished user-facing work ships behind a flag (default `false`). 
 - `vitest.setup.tsx` mocks `next/navigation` (search params follow `window.location`), `next/headers`, `next/link`, `next/image`, `matchMedia` (desktop). For the mobile branch, mock `@mono/hooks` partially (`importOriginal`) with `useIsMobile: () => true`.
 - `server.deps.inline: [/@mono(xa)?\//]` makes `vi.mock("next/navigation")` reach the DS packages — keep it.
 - Prefer ARIA queries over positional ones.
-- **Coverage is 100% and enforced.** Unreachable branch → delete it, or keep a genuine defensive guard with `/* v8 ignore next -- @preserve <reason> */`. Thin route shells are excluded automatically (`vitest.config.ts`).
+- **Coverage is enforced at 80%.** Unreachable branch → delete it, or keep a genuine defensive guard with `/* v8 ignore next -- @preserve <reason> */`. Thin route shells are excluded automatically (`vitest.config.ts`).
 
 ---
 

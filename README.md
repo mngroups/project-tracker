@@ -1,9 +1,9 @@
-# Monexa App Template
+# Project Tracker
 
 Next.js 16 starter with the Monexa stack and conventions: App Router (Turbopack), React 19,
 TypeScript, Tailwind CSS v4, the MoNo design system (`@mono/ui`, built on shadcn/ui),
 `@mono/hooks`, `@mono/utils` and `@mono/auth`, TanStack Query v5, Zustand, Zod v4, react-hook-form,
-Biome and Vitest (100% coverage enforced).
+Biome and Vitest (80% coverage enforced).
 
 What you get out of the box:
 

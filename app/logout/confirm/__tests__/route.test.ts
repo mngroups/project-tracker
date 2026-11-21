@@ -24,9 +24,9 @@ describe("/logout/confirm route", () => {
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe("/login?reason=session_expired&next=%2Fexample");
     expect(response.cookies.deleted.map((item) => item.name)).toEqual([
-      "app_access_token",
-      "app_refresh_token",
-      "app_username",
+      "pt_access_token",
+      "pt_refresh_token",
+      "pt_username",
     ]);
   });
 

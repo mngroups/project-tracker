@@ -19,9 +19,9 @@ describe("lib/session", () => {
     expect(createSession).toHaveBeenCalledWith({
       apiBaseUrl: "https://be.test",
       cookies: {
-        accessToken: "app_access_token",
-        refreshToken: "app_refresh_token",
-        extra: ["app_username"],
+        accessToken: "pt_access_token",
+        refreshToken: "pt_refresh_token",
+        extra: ["pt_username"],
       },
       debug: true,
     });

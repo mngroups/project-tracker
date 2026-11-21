@@ -30,7 +30,7 @@ describe("loginAction", () => {
     expect(await loginAction({ username: "budi", password: "x" })).toEqual({ success: true });
     expect(setAuthCookies).toHaveBeenCalledWith("a", "r", 60, 600);
     expect(cookieSet).toHaveBeenCalledWith(
-      expect.objectContaining({ name: "app_username", value: "budi", httpOnly: false })
+      expect.objectContaining({ name: "pt_username", value: "budi", httpOnly: false })
     );
     expect(apiClient.mock.calls[0][1]).toMatchObject({ skipAuthRefresh: true });
   });
