@@ -25,6 +25,18 @@ What you get out of the box:
 - **Tooling:** Biome, husky (commit-msg + lint-staged), release-it, PR checks, a standalone
   Dockerfile.
 
+## Run locally with project-tracker-api
+
+The backend lives in `../project-tracker-api`.
+
+1. In the API repo: `pnpm dev:issuer` (dev auth on :9000), then Postgres + MinIO
+   (`docker compose up -d`), `pnpm db:migrate` and `pnpm dev` (API on :8080). See its README.
+2. Here: `.env.local` with `API_BASE_URL=http://localhost:8080`, then `pnpm dev`.
+3. Log in as `pm` / `pm123` (Project Manager), `member` / `member123` (Team Member) or
+   `client` / `client123` (Client), all in the dev org "PT Contoh Klien".
+4. Before a PR, check `/projects` and every tab of `/projects/[id]` at 360px and 390px in
+   Chrome DevTools: no horizontal scroll, sticky footers clear the safe area.
+
 ## Use this template
 
 1. Click **Use this template** on GitHub (or copy the repo), then clone it.
