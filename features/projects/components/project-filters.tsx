@@ -1,7 +1,7 @@
 "use client";
 
 import { FloatingSelect, Form, ListSearchInput } from "@mono/ui";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { useDebouncedValue } from "../hooks/use-debounced-value";
@@ -43,18 +43,43 @@ export function ProjectFilters({
 }) {
   const [search, setSearch] = useState(values.search);
   const debounced = useDebouncedValue(search, 300);
+  const typed = useRef(false);
+  const lastPushed = useRef(values.search);
   const form = useForm<SelectValues>({
     defaultValues: { status: values.status ?? ALL, health: values.health ?? ALL },
   });
 
+  // Push only what the user typed; never write a stale debounced value over the URL.
   useEffect(() => {
-    if (debounced !== values.search) onChange({ search: debounced });
-  }, [debounced, values.search, onChange]);
+    if (typed.current && debounced !== lastPushed.current) {
+      typed.current = false;
+      lastPushed.current = debounced;
+      onChange({ search: debounced });
+    }
+  }, [debounced, onChange]);
+
+  // The URL changed on its own (back/forward, a link): follow it.
+  useEffect(() => {
+    if (values.search !== lastPushed.current) {
+      lastPushed.current = values.search;
+      typed.current = false;
+      setSearch(values.search);
+    }
+  }, [values.search]);
+
+  useEffect(() => {
+    form.reset({ status: values.status ?? ALL, health: values.health ?? ALL });
+  }, [values.status, values.health, form]);
+
+  const onSearch = (next: string) => {
+    typed.current = true;
+    setSearch(next);
+  };
 
   return (
     <Form {...form}>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
-        <ListSearchInput value={search} onChange={setSearch} label="Cari kode atau nama" />
+        <ListSearchInput value={search} onChange={onSearch} label="Cari kode atau nama" />
         <FloatingSelect
           control={form.control}
           name="status"

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormDraft } from "@mono/hooks/form-draft";
 import { useModalToggle } from "@mono/hooks/next";
 import { DynamicModal, FloatingInput, FloatingSelect, FloatingTextarea, Form } from "@mono/ui";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 
 import { useCreateProject, useUpdateProject } from "../hooks/use-projects";
@@ -69,8 +69,11 @@ export function ProjectFormModal({ mode, project }: ProjectFormModalProps) {
   });
 
   // Reset on open, before the draft hook restores saved values.
+  // Only on the closed -> open transition: a refetch of `project` must not wipe edits.
+  const wasOpen = useRef(false);
   useEffect(() => {
-    if (open) form.reset(project ? toValues(project) : EMPTY);
+    if (open && !wasOpen.current) form.reset(project ? toValues(project) : EMPTY);
+    wasOpen.current = open;
   }, [open, form, project]);
   const { clearDraft } = useFormDraft(form, {
     key: open ? `project-form:${mode === "edit" ? `edit:${project.id}` : "create"}` : null,

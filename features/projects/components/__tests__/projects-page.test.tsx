@@ -1,5 +1,5 @@
 import { PermissionsProvider } from "@mono/auth/react";
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -169,6 +169,18 @@ describe("ProjectsPage", () => {
         search: "port",
       })
     );
+  });
+
+  it("follows an external URL change and does not write the stale value back", async () => {
+    window.history.replaceState(null, "", "/?search=abc");
+    renderPage();
+    const input = await screen.findByRole("searchbox");
+    expect(input).toHaveValue("abc");
+    act(() => window.history.pushState(null, "", "/"));
+    await waitFor(() => expect(input).toHaveValue(""));
+    await new Promise((r) => setTimeout(r, 450));
+    expect(window.location.search).toBe("");
+    expect(listProjectsAction).toHaveBeenLastCalledWith({ page: 1, page_size: 10 });
   });
 
   it("hides Project Baru without project:manage", async () => {

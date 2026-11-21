@@ -128,4 +128,12 @@ describe("ProjectFormModal (edit)", () => {
       })
     );
   });
+
+  it("keeps in-progress edits when the project is refetched", async () => {
+    const view = renderWithProviders(<ProjectFormModal mode="edit" project={project} />);
+    const name = await screen.findByLabelText("Nama");
+    await userEvent.type(name, " baru");
+    view.rerender(<ProjectFormModal mode="edit" project={{ ...project, name: "Server" }} />);
+    expect(screen.getByLabelText("Nama")).toHaveValue("Alpha baru");
+  });
 });
