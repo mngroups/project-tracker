@@ -1,13 +1,13 @@
 // Rename these when you create an app from the template (see README "Use this template").
 
 /** Product name shown in the browser tab and metadata. */
-export const APP_NAME = "Monexa App";
+export const APP_NAME = "Project Tracker";
 
 /**
  * Prefix of every cookie the app sets. Change it per app so two apps on the same
  * domain never read each other's session.
  */
-export const APP_COOKIE_PREFIX = "app";
+export const APP_COOKIE_PREFIX = "pt";
 
 export const COOKIES = {
   /** HttpOnly bearer token sent to the BE. */

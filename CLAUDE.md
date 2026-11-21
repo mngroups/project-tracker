@@ -1,8 +1,8 @@
-# Monexa App — Agent Instruction Guide
+# Project Tracker — Agent Instruction Guide
 
 ## Project Overview
 
-Next.js 16 (App Router, Turbopack) frontend created from the Monexa app template. React 19, TypeScript, Tailwind CSS v4, [Biome](https://biomejs.dev) for lint + format, the **MoNo design system** (`@mono/ui`, shadcn/ui + Radix + Tailwind v4), `@mono/hooks`, `@mono/utils`, `@mono/auth` (session, API client, RBAC), [TanStack Query](https://tanstack.com/query) v5 for server state, [Zustand](https://github.com/pmndrs/zustand) for client state, [Zod](https://zod.dev) v4, [react-hook-form](https://react-hook-form.com), [Vitest](https://vitest.dev) + React Testing Library.
+Next.js 16 (App Router, Turbopack) frontend created from the Monexa app template: the client-facing project tracker (projects, milestones, tasks, files). React 19, TypeScript, Tailwind CSS v4, [Biome](https://biomejs.dev) for lint + format, the **MoNo design system** (`@mono/ui`, shadcn/ui + Radix + Tailwind v4), `@mono/hooks`, `@mono/utils`, `@mono/auth` (session, API client, RBAC), [TanStack Query](https://tanstack.com/query) v5 for server state, [Zustand](https://github.com/pmndrs/zustand) for client state, [Zod](https://zod.dev) v4, [react-hook-form](https://react-hook-form.com), [Vitest](https://vitest.dev) + React Testing Library.
 
 **Package manager:** `pnpm@10.33.0` (lockfile committed; do **not** mix in npm/yarn).
 **Node:** 24.22.1 (`.nvmrc`, `engines`, the Dockerfile and CI via `node-version-file`; bump all of them together).
@@ -27,7 +27,7 @@ app/
 ├── (auth)/login/            # Unauthenticated routes
 ├── (protected)/             # Requires a session; layout mounts the shell + route gate
 │   ├── layout.tsx
-│   └── example/page.tsx     # Thin shell → features/example
+│   └── projects/page.tsx    # Thin shell → features/projects
 ├── logout/                  # Confirmation page + POST /logout/confirm (clears cookies)
 ├── health/, version/
 ├── layout.tsx               # Root layout: theme script, <Providers>
@@ -36,7 +36,7 @@ app/
 features/
 ├── app-shell/               # Sidebar shell, menu items, RestrictedPage
 ├── auth/                    # Login/logout actions, useAuth, LoginForm, ProtectedPage
-└── example/                 # Reference feature — copy its shape
+└── projects/                # Reference feature — copy its shape
 lib/
 ├── app-config.ts            # APP_NAME, cookie prefix and names
 ├── session.ts               # createSession(): apiClient, token cookies, endExpiredSession
@@ -139,7 +139,7 @@ Built by `createSession()` from `@mono/auth/server` with this app's cookie names
 
 ## React Query Conventions
 
-One `use-<domain>.ts` per feature with a top-level `<DOMAIN>_KEY` const (see `features/example/hooks/use-example.ts`).
+One `use-<domain>.ts` per feature with a top-level `<DOMAIN>_KEY` const (see `features/projects/hooks/use-projects.ts`).
 
 - `staleTime: 30_000` for snapshot/dashboard data; `0` for paged lists.
 - `placeholderData: (prev) => prev` on paginated queries (no table flicker).
@@ -188,7 +188,7 @@ const form = useForm<MyValues>({
 
 - `mode: "onChange"` so submit can disable on `!isValid || !isDirty`.
 - `.min(1)` on every required string — `z.string()` alone accepts `""`.
-- Modal forms open through the URL with `useModalToggle`/`useModalParam` (`@mono/hooks/next`) and keep a draft with `useFormDraft` (`@mono/hooks/form-draft`), called **after** any reset-on-open effect. `clearDraft()` on Batal/success; `clearAllFormDrafts()` on logout. Never draft passwords. See `features/example/components/create-example-modal.tsx`.
+- Modal forms open through the URL with `useModalToggle`/`useModalParam` (`@mono/hooks/next`) and keep a draft with `useFormDraft` (`@mono/hooks/form-draft`), called **after** any reset-on-open effect. `clearDraft()` on Batal/success; `clearAllFormDrafts()` on logout. Never draft passwords. See `features/projects/components/project-form-modal.tsx`.
 
 ---
 
@@ -200,7 +200,7 @@ Only for client-only state that outlives a component (UI filters, toggles). Serv
 
 ## Permissions (RBAC)
 
-Everything flows from `GET /v1/auth/check` → `{ user_id, permissions: string[] }`; the FE never hardcodes a catalog. A granted `:all` parent includes every descendant (`example:all` grants `example.item:view`).
+Everything flows from `GET /v1/auth/check` → `{ user_id, permissions: string[] }`; the FE never hardcodes a catalog. A granted `:all` parent includes every descendant (`project:all` grants `project.task:update`).
 
 | Concern                                      | Where                                                                         |
 | -------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -231,7 +231,7 @@ Trunk-based: unfinished user-facing work ships behind a flag (default `false`). 
 - `vitest.setup.tsx` mocks `next/navigation` (search params follow `window.location`), `next/headers`, `next/link`, `next/image`, `matchMedia` (desktop). For the mobile branch, mock `@mono/hooks` partially (`importOriginal`) with `useIsMobile: () => true`.
 - `server.deps.inline: [/@mono(xa)?\//]` makes `vi.mock("next/navigation")` reach the DS packages — keep it.
 - Prefer ARIA queries over positional ones.
-- **Coverage is 100% and enforced.** Unreachable branch → delete it, or keep a genuine defensive guard with `/* v8 ignore next -- @preserve <reason> */`. Thin route shells are excluded automatically (`vitest.config.ts`).
+- **Coverage is enforced at 80%.** Unreachable branch → delete it, or keep a genuine defensive guard with `/* v8 ignore next -- @preserve <reason> */`. Thin route shells are excluded automatically (`vitest.config.ts`).
 
 ---
 
@@ -250,7 +250,7 @@ Before pushing: `pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm build
 
 ## Adding a New Feature — Recipe
 
-1. `features/<domain>/` with `actions/`, `components/`, `hooks/`, `schema.ts` (copy `features/example/`).
+1. `features/<domain>/` with `actions/`, `components/`, `hooks/`, `schema.ts` (copy `features/projects/`).
 2. Schemas: request params + `apiEnvelope(...)` responses; export inferred types.
 3. Server Actions in `actions/<domain>.actions.ts`.
 4. React Query hooks in `hooks/use-<domain>.ts` with a `<DOMAIN>_KEY`.

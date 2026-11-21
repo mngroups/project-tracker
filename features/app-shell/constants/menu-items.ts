@@ -1,5 +1,5 @@
 import type { AppShellItem } from "@mono/ui";
-import { LayoutList } from "lucide-react";
+import { FolderKanban } from "lucide-react";
 
 /**
  * Sidebar entries, top to bottom. The order is also the post-login landing
@@ -7,4 +7,6 @@ import { LayoutList } from "lucide-react";
  * `resolveLandingRoute`). The same entries appear in the mobile bottom nav.
  * Gate an entry by adding its route to `lib/permissions/routes.ts::ROUTE_PERMISSIONS`.
  */
-export const MENU_ITEMS: AppShellItem[] = [{ label: "Contoh", href: "/example", icon: LayoutList }];
+export const MENU_ITEMS: AppShellItem[] = [
+  { label: "Project", href: "/projects", icon: FolderKanban },
+];

@@ -12,9 +12,9 @@ registry, [`lib/feature-flags/registry.ts`](../../lib/feature-flags/registry.ts)
 
 ## Current flags
 
-| Flag          | Scope  | Source                      | Default | Gates                                  |
-| ------------- | ------ | --------------------------- | ------- | -------------------------------------- |
-| `exampleFlag` | client | `NEXT_PUBLIC_FEATURE_FLAGS` | `false` | "Ekspor" button on the `/example` page |
+| Flag          | Scope  | Source                      | Default | Gates                              |
+| ------------- | ------ | --------------------------- | ------- | ---------------------------------- |
+| `exampleFlag` | client | `NEXT_PUBLIC_FEATURE_FLAGS` | `false` | Sample flag, no screen uses it yet |
 
 > `pnpm flag:new` / `pnpm flag:remove` keep this table in sync with `registry.ts`.
 

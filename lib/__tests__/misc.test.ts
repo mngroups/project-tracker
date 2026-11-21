@@ -7,7 +7,7 @@ import { toast } from "../toast";
 describe("app-config", () => {
   it("prefixes every session cookie", () => {
     expect(SESSION_COOKIES).toEqual([COOKIES.accessToken, COOKIES.refreshToken, COOKIES.username]);
-    expect(COOKIES.accessToken).toBe("app_access_token");
+    expect(COOKIES.accessToken).toBe("pt_access_token");
   });
 });
 

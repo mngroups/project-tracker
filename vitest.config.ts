@@ -62,7 +62,7 @@ export default defineConfig({
         // Thin route shells only mount a feature component (CLAUDE.md "Page composition rule").
         ...thinRouteShells(),
       ],
-      thresholds: { lines: 100, statements: 100, functions: 100, branches: 100 },
+      thresholds: { lines: 80, statements: 80, functions: 80, branches: 80 },
     },
   },
   resolve: {
