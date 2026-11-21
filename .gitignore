@@ -1,0 +1,27 @@
+# dependencies
+/node_modules
+.pnp
+.pnp.*
+
+# testing
+/coverage
+/.vitest-reports
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+.pnpm-debug.log*
+
+# env files and registry tokens (copy the *.example files)
+.env*
+!.env.example
+.npmrc*
+!.npmrc.example

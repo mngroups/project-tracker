@@ -1,0 +1,10 @@
+/* Order matters — see @mono/ui's README: Tailwind first, then the
+   design-system tokens and theme (styles.css uses @theme / @utility). */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@mono/ui/styles.css";
+/* Brand tokens. To rebrand, replace this with your own file overriding the same variables. */
+@import "@mono/ui/theme-default.css";
+
+/* Tailwind must scan the design system so the classes it uses are generated. */
+@source "../node_modules/@mono/ui/dist";

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+MSG="$(head -n 1 "$1")"
+
+# release-it commits, e.g. "chore: release 1.2.3"
+RELEASE_PATTERN='^chore: release [0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$'
+PATTERN='^(feat|fix|ai|ops|perf|refactor|test|chore|docs|change|remove): .+'
+
+echo "Monexa: checking commit message"
+
+if echo "$MSG" | grep -qE "$RELEASE_PATTERN"; then
+  exit 0
+fi
+
+if ! echo "$MSG" | grep -qE "$PATTERN"; then
+  echo "Invalid commit message. Expected '<type>: <subject>' with type in"
+  echo "feat|fix|ai|ops|perf|refactor|test|chore|docs|change|remove (no scope)."
+  echo "Example: feat: add export to the example list"
+  exit 1
+fi

@@ -1,0 +1,88 @@
+name: PR Checks
+
+# Mark lint, typecheck, test and build as required checks on main.
+# GITLAB_NPM_TOKEN (repository secret) needs read_package_registry access.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Prepare the registry lockfile or validate the committed lockfile
+        required: true
+        type: choice
+        options:
+          - prepare-lockfile
+          - validate
+        default: prepare-lockfile
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: ${{ matrix.check }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - check: lint
+            command: pnpm lint
+          - check: typecheck
+            command: pnpm typecheck
+          - check: test
+            command: pnpm test:coverage
+          - check: build
+            command: pnpm build
+    steps:
+      - uses: actions/checkout@v6
+      - run: corepack enable
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Configure GitLab npm registry
+        env:
+          GITLAB_NPM_TOKEN: ${{ secrets.GITLAB_NPM_TOKEN }}
+          GITLAB_PACKAGE_GROUP_ID: ${{ vars.GITLAB_PACKAGE_GROUP_ID }}
+        run: |
+          set -eu
+          : "${GITLAB_NPM_TOKEN:?Set the GITLAB_NPM_TOKEN secret}"
+          : "${GITLAB_PACKAGE_GROUP_ID:?Set the GITLAB_PACKAGE_GROUP_ID Actions variable}"
+          {
+            printf '@mono:registry=https://gitlab.com/api/v4/groups/%s/-/packages/npm/\n' "$GITLAB_PACKAGE_GROUP_ID"
+            printf '//gitlab.com/api/v4/groups/%s/-/packages/npm/:_authToken=%s\n' "$GITLAB_PACKAGE_GROUP_ID" "$GITLAB_NPM_TOKEN"
+            printf '//gitlab.com/api/v4/projects/89199789/packages/npm/:_authToken=%s\n' "$GITLAB_NPM_TOKEN"
+            printf '//gitlab.com/api/v4/projects/89199810/packages/npm/:_authToken=%s\n' "$GITLAB_NPM_TOKEN"
+            printf '//gitlab.com/api/v4/projects/89199850/packages/npm/:_authToken=%s\n' "$GITLAB_NPM_TOKEN"
+            printf '//gitlab.com/api/v4/projects/89199831/packages/npm/:_authToken=%s\n' "$GITLAB_NPM_TOKEN"
+          } > "$HOME/.npmrc"
+      - name: Install dependencies for registry lockfile preparation
+        if: github.event_name == 'workflow_dispatch' && inputs.operation == 'prepare-lockfile'
+        run: pnpm install --no-frozen-lockfile
+      - name: Install dependencies
+        if: github.event_name == 'pull_request' || inputs.operation == 'validate'
+        run: pnpm install --frozen-lockfile
+      - run: ${{ matrix.command }}
+      - name: Upload prepared lockfile
+        if: github.event_name == 'workflow_dispatch' && inputs.operation == 'prepare-lockfile' && matrix.check == 'build'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnpm-lock
+          path: pnpm-lock.yaml
+          if-no-files-found: error
+      - name: Coverage summary
+        if: ${{ always() && matrix.check == 'test' && hashFiles('coverage/coverage-summary.json') != '' }}
+        run: |
+          {
+            echo "## Coverage"
+            echo
+            echo "| Metric | Covered | Total | % |"
+            echo "| --- | ---: | ---: | ---: |"
+            jq -r '.total | to_entries[] | select(.key != "branchesTrue") | "| \(.key) | \(.value.covered) | \(.value.total) | \(.value.pct)% |"' coverage/coverage-summary.json
+          } >> "$GITHUB_STEP_SUMMARY"

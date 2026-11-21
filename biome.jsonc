@@ -1,0 +1,145 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/.next",
+      "!**/coverage",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!next-env.d.ts",
+      "!load-test.js",
+      "!public/sw.js",
+      "!android",
+      "!ios",
+      "!www",
+      "!pnpm-lock.yaml",
+      // Written by release-it on every release; its format is not ours to enforce.
+      "!CHANGELOG.md"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "es5"
+    }
+  },
+  "css": {
+    "parser": { "tailwindDirectives": true }
+  },
+  "tailwind": {
+    "stylesheet": "./app/globals.css",
+    "mergeFunctions": ["cn", "clsx", "twMerge"],
+    "variantFunctions": ["cva"]
+  },
+  "linter": {
+    "enabled": true,
+    "domains": {
+      "react": "recommended",
+      "next": "recommended",
+      "tailwind": "recommended"
+    },
+    "rules": {
+      "preset": "recommended",
+      // Rules below set to "off" were never enforced under the old ESLint setup
+      // (next/core-web-vitals + @typescript-eslint/recommended) and fire on
+      // existing, intentional code. Turning them on is a behaviour change, not
+      // part of the ESLint -> Biome swap; adopt them one PR at a time.
+      "a11y": {
+        "noLabelWithoutControl": "off",
+        "noStaticElementInteractions": "off",
+        "noSvgWithoutTitle": "off",
+        "useButtonType": "off",
+        "useFocusableInteractive": "off",
+        "useKeyWithClickEvents": "off",
+        "useSemanticElements": "off"
+      },
+      "complexity": {
+        "noImportantStyles": "off"
+      },
+      "correctness": {
+        // Buttons go through @mono/ui: Button for standard ones, PlainButton
+        // for custom-styled ones.
+        "noRestrictedElements": {
+          "level": "error",
+          "options": {
+            "elements": {
+              "button": "use PlainButton or Button from @mono/ui instead of a native <button>"
+            }
+          }
+        },
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        // ESLint's exhaustive-deps does not flag effect deps used purely as
+        // re-run triggers (e.g. scroll-to-bottom on `messages`); keep that.
+        "useExhaustiveDependencies": {
+          "level": "error",
+          "options": { "reportUnnecessaryDependencies": false }
+        },
+        "useHookAtTopLevel": "error",
+        // Flags the deliberate `const useColumn = …` per-column hook pattern
+        // and inline react-day-picker slot components.
+        "noComponentHookFactories": "off"
+      },
+      "security": {
+        // Theme bootstrap script in app/layout.tsx and the login page.
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "style": {
+        "useImportType": "error",
+        "useExportType": "error",
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noAssignInExpressions": "off",
+        // The non-HttpOnly UI cookies (sidebar state, <prefix>_username).
+        "noDocumentCookie": "off",
+        "noImplicitAnyLet": "off",
+        // A component shares its name with the type it is generic over
+        // (`FeatureFlag` in lib/feature-flags/client.tsx).
+        "noRedeclare": "off",
+        // lucide-react's `Map` icon.
+        "noShadowRestrictedNames": "off",
+        // release-it's `${version}` placeholders.
+        "noTemplateCurlyInString": "off",
+        "useIterableCallbackReturn": "off"
+      },
+      "nursery": {
+        "useTailwindSortedClasses": { "level": "error", "fix": "safe" }
+      }
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": { "source": { "organizeImports": "on" } }
+  },
+  "overrides": [
+    {
+      "includes": ["vitest.setup.tsx", "**/__tests__/**", "**/*.test.*", "**/*.spec.*"],
+      "linter": {
+        "rules": {
+          // Tests stub next/image with a plain <img> and fake thenables.
+          "performance": { "noImgElement": "off" },
+          "correctness": { "noRestrictedElements": "off" },
+          "suspicious": { "noExplicitAny": "off", "noThenProperty": "off" }
+        }
+      }
+    },
+    {
+      // Hand-written ambient declarations for untyped d3 modules.
+      "includes": ["types/**"],
+      "linter": { "rules": { "suspicious": { "noExplicitAny": "off" } } }
+    }
+  ]
+}
