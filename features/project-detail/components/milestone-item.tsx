@@ -6,7 +6,7 @@ import { ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
 import { ProjectProgress } from "@/features/projects/components/project-progress";
 import { formatProjectDate } from "@/features/projects/helpers/format-date";
-import type { Milestone } from "@/features/projects/schema";
+import type { Milestone, Task } from "@/features/projects/schema";
 
 import { TaskRow } from "./task-row";
 
@@ -28,13 +28,23 @@ export const MILESTONE_STATUS_TONE: Record<Milestone["status"], StatusTone> = {
 
 type MilestoneItemProps = {
   milestone: Milestone;
-  /** Slot for approve/decide controls (later tasks). */
+  /** Slot for manage and approve/decide controls. */
   actions?: ReactNode;
   defaultOpen?: boolean;
+  /** Present once the viewer may update tasks: shows each task's checkbox. */
+  onToggleTask?: (task: Task) => void;
+  /** Trailing controls for one task row. */
+  renderTaskActions?: (task: Task) => ReactNode;
 };
 
 /** One node of the vertical milestone timeline (rail on the left at every width). */
-export function MilestoneItem({ milestone, actions, defaultOpen = false }: MilestoneItemProps) {
+export function MilestoneItem({
+  milestone,
+  actions,
+  defaultOpen = false,
+  onToggleTask,
+  renderTaskActions,
+}: MilestoneItemProps) {
   const tasks = [...milestone.tasks].sort((a, b) => a.position - b.position);
   return (
     <li
@@ -82,7 +92,12 @@ export function MilestoneItem({ milestone, actions, defaultOpen = false }: Miles
           ) : (
             <ul className="divide-y">
               {tasks.map((t) => (
-                <TaskRow key={t.id} task={t} />
+                <TaskRow
+                  key={t.id}
+                  task={t}
+                  onToggle={onToggleTask}
+                  actions={renderTaskActions?.(t)}
+                />
               ))}
             </ul>
           )}

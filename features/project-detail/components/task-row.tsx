@@ -1,4 +1,5 @@
 import { Checkbox, StatusLabel } from "@mono/ui";
+import type { ReactNode } from "react";
 
 import { formatProjectDate } from "@/features/projects/helpers/format-date";
 import type { Task } from "@/features/projects/schema";
@@ -13,9 +14,11 @@ type TaskRowProps = {
   task: Task;
   /** Present once tasks are editable: renders a checkbox. */
   onToggle?: (task: Task) => void;
+  /** Trailing controls (e.g. the manage menu). */
+  actions?: ReactNode;
 };
 
-export function TaskRow({ task, onToggle }: TaskRowProps) {
+export function TaskRow({ task, onToggle, actions }: TaskRowProps) {
   return (
     <li className="flex min-w-0 items-start gap-3 py-2" data-testid="task-row">
       {onToggle && (
@@ -23,7 +26,8 @@ export function TaskRow({ task, onToggle }: TaskRowProps) {
           checked={task.status === "done"}
           onCheckedChange={() => onToggle(task)}
           aria-label={`Tandai ${task.title}`}
-          className="mt-0.5"
+          // The ::after pseudo-element grows the touch target to 40x40 without growing the box.
+          className="relative mt-1.5 size-5 shrink-0 after:absolute after:-inset-2.5 after:content-['']"
         />
       )}
       <div className="min-w-0 flex-1 space-y-1">
@@ -37,6 +41,7 @@ export function TaskRow({ task, onToggle }: TaskRowProps) {
           {task.due_date ? ` · ${formatProjectDate(task.due_date)}` : ""}
         </p>
       </div>
+      {actions}
     </li>
   );
 }
