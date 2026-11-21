@@ -9,6 +9,7 @@ import { ProjectFormModal } from "@/features/projects/components/project-form-mo
 import { useProject } from "@/features/projects/hooks/use-projects";
 import { ApprovalBanner } from "./approval-banner";
 import { APPROVAL_MODAL, ApprovalModal } from "./approval-modal";
+import { FilesTab } from "./files-tab";
 import { MilestonesTab } from "./milestones-tab";
 import { OverviewTab } from "./overview-tab";
 import { ProjectDetailSkeleton } from "./project-detail-skeleton";
@@ -67,9 +68,7 @@ export function ProjectDetailPage({ id }: { id: string }) {
           }
         />
       )}
-      {tab === "file" && (
-        <p className="py-6 text-center text-sm text-muted-foreground">Belum ada file</p>
-      )}
+      {tab === "file" && <FilesTab project={project} />}
       {canApprove && <ApprovalModal project={project} />}
       {canManage && <ProjectFormModal mode="edit" project={project} />}
     </div>
