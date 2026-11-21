@@ -29,9 +29,9 @@ describe("proxy", () => {
   });
 
   it("passes the pathname on to the layouts", () => {
-    proxy(request("/example", { pt_access_token: "a" }));
+    proxy(request("/projects", { pt_access_token: "a" }));
     const init = next.mock.calls[0][0] as { request: { headers: Headers } };
-    expect(init.request.headers.get("x-pathname")).toBe("/example");
+    expect(init.request.headers.get("x-pathname")).toBe("/projects");
     expect(NextResponse.redirect).not.toHaveBeenCalled();
   });
 

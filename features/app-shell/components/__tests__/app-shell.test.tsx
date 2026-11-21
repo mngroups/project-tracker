@@ -9,7 +9,7 @@ const logout = vi.fn();
 vi.mock("@/features/auth/hooks/use-auth", () => ({
   useAuth: () => ({ login: vi.fn(), isLoggingIn: false, logout, isLoggingOut: false }),
 }));
-let pathname = "/example";
+let pathname = "/projects";
 vi.mock("next/navigation", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/navigation")>()),
   usePathname: () => pathname,
@@ -57,28 +57,28 @@ function renderShell(permissions: string[] | null) {
 describe("AppShell", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    pathname = "/example";
+    pathname = "/projects";
     document.cookie = "sidebar_state=; max-age=0";
   });
 
   it("renders the accessible menu, mobile tab and page", () => {
-    renderShell(["example.item:view"]);
+    renderShell(["project:view"]);
     expect(screen.getByText("page")).toBeInTheDocument();
     expect(
-      within(screen.getByRole("navigation", { name: "Menu" })).getByText("Contoh")
+      within(screen.getByRole("navigation", { name: "Menu" })).getByText("Project")
     ).toBeInTheDocument();
     expect(
-      within(screen.getByRole("navigation", { name: "Navigasi mobile" })).getByText("Contoh")
+      within(screen.getByRole("navigation", { name: "Navigasi mobile" })).getByText("Project")
     ).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Menu" }).parentElement).toHaveAttribute(
       "data-pathname",
-      "/example"
+      "/projects"
     );
   });
 
   it("hides entries the user can't open", () => {
     renderShell([]);
-    expect(screen.queryByText("Contoh")).not.toBeInTheDocument();
+    expect(screen.queryByText("Project")).not.toBeInTheDocument();
   });
 
   it("logs out", () => {

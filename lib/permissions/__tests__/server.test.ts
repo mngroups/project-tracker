@@ -22,16 +22,16 @@ describe("permissions/server", () => {
   });
 
   it("gates routes and picks the landing route from /v1/auth/check", async () => {
-    getAuthCheckAction.mockResolvedValue({ user_id: "u1", permissions: ["example.item:view"] });
-    expect(await getPermissions()).toEqual(["example.item:view"]);
-    expect(await canAccessRoute("/example")).toBe(true);
-    expect(await can("example.item:create")).toBe(false);
-    expect(await resolveLandingRoute()).toBe("/example");
+    getAuthCheckAction.mockResolvedValue({ user_id: "u1", permissions: ["project:view"] });
+    expect(await getPermissions()).toEqual(["project:view"]);
+    expect(await canAccessRoute("/projects")).toBe(true);
+    expect(await can("project:manage")).toBe(false);
+    expect(await resolveLandingRoute()).toBe("/projects");
   });
 
   it("blocks a mapped route without its permission", async () => {
     getAuthCheckAction.mockResolvedValue({ user_id: "u1", permissions: [] });
-    expect(await canAccessRoute("/example")).toBe(false);
+    expect(await canAccessRoute("/projects")).toBe(false);
     expect(await resolveLandingRoute()).toBeNull();
   });
 

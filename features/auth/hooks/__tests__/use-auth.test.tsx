@@ -28,11 +28,11 @@ describe("useAuth", () => {
   });
 
   it("returns to the sanitized ?next= page", async () => {
-    window.history.replaceState(null, "", "/login?next=%2Fexample%3Fpage%3D2");
+    window.history.replaceState(null, "", "/login?next=%2Fprojects%3Fpage%3D2");
     loginAction.mockResolvedValue({ success: true });
     const { result } = renderHook(() => useAuth(), { wrapper: TestWrapper });
     act(() => result.current.login({ username: "budi", password: "x" }));
-    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/example?page=2"));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/projects?page=2"));
   });
 
   it("toasts a failed login and stays put", async () => {

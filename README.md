@@ -19,8 +19,8 @@ What you get out of the box:
 - **File upload:** `FileUploadDropzone` + `useUploadQueue`: presigned browser → storage upload with
   per-file progress, retry and cancel ([guide](docs/guides/file-upload.md)).
 - **Feature flags:** typed registry plus `pnpm flag:new` / `pnpm flag:remove`.
-- **Reference feature:** `features/example/`, a list page with table and mobile cards, skeleton,
-  empty state, a URL-backed modal form with drafts, and a flag-gated action. Copy its shape for
+- **Reference feature:** `features/projects/`, a list page with table and mobile cards, skeleton,
+  empty state, a URL-backed modal form with drafts. Copy its shape for
   new features.
 - **Tooling:** Biome, husky (commit-msg + lint-staged), release-it, PR checks, a standalone
   Dockerfile.
@@ -52,7 +52,7 @@ What you get out of the box:
    pnpm dev           # http://localhost:3000
    ```
 
-6. Replace `features/example/` with your first feature (see CLAUDE.md "Adding a New Feature")
+6. Add your next feature next to `features/projects/` (see CLAUDE.md "Adding a New Feature")
    and update the MoNo UI shell entries in `features/app-shell/constants/menu-items.ts` and
    `lib/permissions/routes.ts`.
 7. CI: add the `GITLAB_NPM_TOKEN` repository secret and `GITLAB_PACKAGE_GROUP_ID` Actions variable,
