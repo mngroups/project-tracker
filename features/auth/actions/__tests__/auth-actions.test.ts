@@ -4,8 +4,15 @@ const apiClient = vi.fn();
 const setAuthCookies = vi.fn();
 const clearAuthCookies = vi.fn();
 const getAccessToken = vi.fn();
+const getRefreshToken = vi.fn();
 const cookieSet = vi.fn();
-vi.mock("@/lib/session", () => ({ apiClient, setAuthCookies, clearAuthCookies, getAccessToken }));
+vi.mock("@/lib/session", () => ({
+  apiClient,
+  setAuthCookies,
+  clearAuthCookies,
+  getAccessToken,
+  getRefreshToken,
+}));
 vi.mock("next/headers", () => ({ cookies: vi.fn(async () => ({ set: cookieSet })) }));
 
 const { loginAction } = await import("../login-action");
@@ -72,6 +79,32 @@ describe("logoutAction", () => {
     expect(clearAuthCookies).toHaveBeenCalled();
   });
 
+  it("sends the refresh token so the BE can revoke it", async () => {
+    getAccessToken.mockResolvedValue("a");
+    getRefreshToken.mockResolvedValue("r1");
+    apiClient.mockResolvedValue({ success: true });
+    await logoutAction();
+    expect(apiClient).toHaveBeenCalledWith(
+      "/v1/auth/logout",
+      { method: "POST", skipAuthRefresh: true, body: JSON.stringify({ refresh_token: "r1" }) },
+      expect.anything()
+    );
+    expect(clearAuthCookies).toHaveBeenCalled();
+  });
+
+  it("still revokes the refresh token after the access token has expired", async () => {
+    getAccessToken.mockResolvedValue(undefined);
+    getRefreshToken.mockResolvedValue("r2");
+    apiClient.mockResolvedValue({ success: true });
+    await logoutAction();
+    expect(apiClient).toHaveBeenCalledWith(
+      "/v1/auth/logout",
+      { method: "POST", skipAuthRefresh: true, body: JSON.stringify({ refresh_token: "r2" }) },
+      expect.anything()
+    );
+    expect(clearAuthCookies).toHaveBeenCalled();
+  });
+
   it("still clears the cookies when the BE call fails or there is no token", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     getAccessToken.mockResolvedValue("a");
@@ -80,6 +113,7 @@ describe("logoutAction", () => {
     expect(clearAuthCookies).toHaveBeenCalledTimes(1);
 
     getAccessToken.mockResolvedValue(undefined);
+    getRefreshToken.mockResolvedValue(undefined);
     await logoutAction();
     expect(apiClient).toHaveBeenCalledTimes(1);
     expect(clearAuthCookies).toHaveBeenCalledTimes(2);
