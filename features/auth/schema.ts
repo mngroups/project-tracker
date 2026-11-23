@@ -18,12 +18,16 @@ export const loginResponseSchema = apiEnvelope(
   })
 );
 
-export const logoutResponseSchema = apiEnvelope(z.unknown().optional());
+export const orgSchema = z.object({ id: z.string(), name: z.string() });
+
+export type Org = z.infer<typeof orgSchema>;
 
 export const authCheckSchema = apiEnvelope(
   z.object({
     user_id: z.string(),
     permissions: z.array(z.string()),
+    // The token's active org. Optional so a BE on server-kit < 0.3.1 (no `org`) still passes.
+    org: orgSchema.nullish(),
   })
 );
 

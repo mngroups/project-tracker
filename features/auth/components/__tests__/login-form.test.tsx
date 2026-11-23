@@ -4,9 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const login = vi.fn();
 let isLoggingIn = false;
+let loginRefusal: { reason?: string; message: string } | null = null;
 const toastInfo = vi.fn();
 vi.mock("../../hooks/use-auth", () => ({
-  useAuth: () => ({ login, isLoggingIn, logout: vi.fn(), isLoggingOut: false }),
+  useAuth: () => ({ login, isLoggingIn, loginRefusal, logout: vi.fn(), isLoggingOut: false }),
 }));
 vi.mock("@/lib/toast", () => ({ toast: { info: toastInfo } }));
 
@@ -16,6 +17,7 @@ describe("LoginForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     isLoggingIn = false;
+    loginRefusal = null;
   });
 
   it("links to the public template overview", () => {
@@ -52,5 +54,17 @@ describe("LoginForm", () => {
     const { rerender } = render(<LoginForm />);
     rerender(<LoginForm />);
     expect(toastInfo).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers the password-change link only when the BE requires a new password", () => {
+    const url = "https://auth.test/account/password";
+    loginRefusal = { reason: "invalid_credentials", message: "Username atau password salah" };
+    const { rerender } = render(<LoginForm passwordChangeUrl={url} />);
+    expect(screen.queryByRole("link", { name: "Ganti password" })).not.toBeInTheDocument();
+
+    loginRefusal = { reason: "password_change_required", message: "Password harus diganti" };
+    rerender(<LoginForm passwordChangeUrl={url} />);
+    expect(screen.getByText("Password harus diganti")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ganti password" })).toHaveAttribute("href", url);
   });
 });

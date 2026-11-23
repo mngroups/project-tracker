@@ -13,8 +13,16 @@ import { useAuth } from "../hooks/use-auth";
 import { type LoginFormValues, loginSchema } from "../schema";
 import { AuthCard, AuthCardTitle, AuthLayout } from "./auth-card";
 
-export default function LoginForm() {
-  const { login, isLoggingIn } = useAuth();
+export default function LoginForm({
+  passwordChangeUrl = null,
+  logoUrl = null,
+}: {
+  /** The client's login logo, if any. */
+  logoUrl?: string | null;
+  /** monexa-auth's change-password page; shown when the BE refuses with password_change_required. */
+  passwordChangeUrl?: string | null;
+}) {
+  const { login, isLoggingIn, loginRefusal } = useAuth();
   const searchParams = useSearchParams();
   const expiryNotified = useRef(false);
 
@@ -34,7 +42,7 @@ export default function LoginForm() {
   const { isValid, isDirty } = form.formState;
 
   return (
-    <AuthLayout>
+    <AuthLayout logoUrl={logoUrl}>
       <AuthCard>
         <AuthCardTitle>Masuk</AuthCardTitle>
         <Form {...form}>
@@ -69,6 +77,14 @@ export default function LoginForm() {
             </Button>
           </form>
         </Form>
+        {loginRefusal?.reason === "password_change_required" && passwordChangeUrl && (
+          <p role="alert" className="mt-4 text-center text-sm text-muted-foreground">
+            {loginRefusal.message}{" "}
+            <a href={passwordChangeUrl} className="font-medium text-primary hover:underline">
+              Ganti password
+            </a>
+          </p>
+        )}
         <p className="mt-5 text-center text-sm text-muted-foreground">
           <Link href="/template" className="font-medium text-primary hover:underline">
             Tentang template

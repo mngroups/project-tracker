@@ -33,17 +33,24 @@ export function useAuth() {
   });
 
   const logoutMutation = useMutation({
-    mutationFn: logoutAction,
-    onSettled: () => {
+    mutationFn: () => logoutAction(),
+    onSettled: (result) => {
       clearAllFormDrafts();
       queryClient.clear();
-      router.replace("/login");
+      // sso: end the provider's session too, or /login would sign straight back in.
+      if (result?.endSessionUrl) window.location.assign(result.endSessionUrl);
+      else router.replace("/login");
     },
   });
 
   return {
     login: loginMutation.mutate,
     isLoggingIn: loginMutation.isPending,
+    /** The last refused login (BE message + `data.reason`), for inline follow-ups. */
+    loginRefusal:
+      loginMutation.data && !loginMutation.data.success
+        ? { reason: loginMutation.data.reason, message: loginMutation.data.message }
+        : null,
     logout: () => logoutMutation.mutate(),
     isLoggingOut: logoutMutation.isPending,
   };

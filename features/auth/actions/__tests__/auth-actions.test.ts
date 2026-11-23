@@ -5,6 +5,7 @@ const setAuthCookies = vi.fn();
 const clearAuthCookies = vi.fn();
 const getAccessToken = vi.fn();
 const getRefreshToken = vi.fn();
+const authFlow = { logout: vi.fn() };
 const cookieSet = vi.fn();
 vi.mock("@/lib/session", () => ({
   apiClient,
@@ -12,6 +13,7 @@ vi.mock("@/lib/session", () => ({
   clearAuthCookies,
   getAccessToken,
   getRefreshToken,
+  authFlow,
 }));
 vi.mock("next/headers", () => ({ cookies: vi.fn(async () => ({ set: cookieSet })) }));
 
@@ -49,6 +51,20 @@ describe("loginAction", () => {
     });
   });
 
+  it("passes the BE refusal reason along", async () => {
+    apiClient.mockRejectedValue(
+      new ApiError("Password harus diganti", 401, undefined, undefined, {
+        reason: "password_change_required",
+      })
+    );
+    expect(await loginAction({ username: "budi", password: "x" })).toEqual({
+      success: false,
+      message: "Password harus diganti",
+      status: 401,
+      reason: "password_change_required",
+    });
+  });
+
   it("returns thrown errors with their status", async () => {
     apiClient.mockRejectedValue(new ApiError("Password salah", 401));
     expect(await loginAction({ username: "budi", password: "x" })).toEqual({
@@ -67,56 +83,10 @@ describe("loginAction", () => {
 describe("logoutAction", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("revokes the BE session and clears the cookies", async () => {
-    getAccessToken.mockResolvedValue("a");
-    apiClient.mockResolvedValue({ success: true });
-    await logoutAction();
-    expect(apiClient).toHaveBeenCalledWith(
-      "/v1/auth/logout",
-      { method: "POST", skipAuthRefresh: true },
-      expect.anything()
-    );
-    expect(clearAuthCookies).toHaveBeenCalled();
-  });
-
-  it("sends the refresh token so the BE can revoke it", async () => {
-    getAccessToken.mockResolvedValue("a");
-    getRefreshToken.mockResolvedValue("r1");
-    apiClient.mockResolvedValue({ success: true });
-    await logoutAction();
-    expect(apiClient).toHaveBeenCalledWith(
-      "/v1/auth/logout",
-      { method: "POST", skipAuthRefresh: true, body: JSON.stringify({ refresh_token: "r1" }) },
-      expect.anything()
-    );
-    expect(clearAuthCookies).toHaveBeenCalled();
-  });
-
-  it("still revokes the refresh token after the access token has expired", async () => {
-    getAccessToken.mockResolvedValue(undefined);
-    getRefreshToken.mockResolvedValue("r2");
-    apiClient.mockResolvedValue({ success: true });
-    await logoutAction();
-    expect(apiClient).toHaveBeenCalledWith(
-      "/v1/auth/logout",
-      { method: "POST", skipAuthRefresh: true, body: JSON.stringify({ refresh_token: "r2" }) },
-      expect.anything()
-    );
-    expect(clearAuthCookies).toHaveBeenCalled();
-  });
-
-  it("still clears the cookies when the BE call fails or there is no token", async () => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    getAccessToken.mockResolvedValue("a");
-    apiClient.mockRejectedValue(new Error("down"));
-    await logoutAction();
-    expect(clearAuthCookies).toHaveBeenCalledTimes(1);
-
-    getAccessToken.mockResolvedValue(undefined);
-    getRefreshToken.mockResolvedValue(undefined);
-    await logoutAction();
-    expect(apiClient).toHaveBeenCalledTimes(1);
-    expect(clearAuthCookies).toHaveBeenCalledTimes(2);
+  it("signs out everywhere and hands back the end-session URL", async () => {
+    authFlow.logout.mockResolvedValue({ endSessionUrl: "https://auth.test/end" });
+    expect(await logoutAction()).toEqual({ endSessionUrl: "https://auth.test/end" });
+    expect(authFlow.logout).toHaveBeenCalledWith({ central: true });
   });
 });
 
