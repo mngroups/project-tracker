@@ -2,6 +2,12 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { COOKIES } from "@/lib/app-config";
+import { contentSecurityPolicy } from "@/lib/security-headers";
+
+function withCsp<T extends { headers: Headers }>(response: T): T {
+  response.headers.set("Content-Security-Policy", contentSecurityPolicy());
+  return response;
+}
 
 /**
  * Cheap cookie-based routing only (Next 16 proxy, ex-middleware). Auth itself is
@@ -16,17 +22,17 @@ export function proxy(request: NextRequest) {
   // "/" resolves the landing route from permissions in app/page.tsx; the proxy
   // has no permission data, so it only handles the signed-out case.
   if (pathname === "/" && !isAuth) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return withCsp(NextResponse.redirect(new URL("/login", request.url)));
   }
 
   if (isAuth && pathname.startsWith("/login")) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return withCsp(NextResponse.redirect(new URL("/", request.url)));
   }
 
   // Layouts can't read the pathname; the protected layout needs it for the route gate.
   const headers = new Headers(request.headers);
   headers.set("x-pathname", pathname);
-  return NextResponse.next({ request: { headers } });
+  return withCsp(NextResponse.next({ request: { headers } }));
 }
 
 export const config = {
