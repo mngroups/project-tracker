@@ -177,6 +177,18 @@ describe("files tab", () => {
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith("File dihapus"));
   });
 
+  it.each(["Batal", "Tutup"])("%s on the delete confirmation goes back only once", async (name) => {
+    attachmentActions.listAttachmentsAction.mockResolvedValue([attachment()]);
+    const back = vi.spyOn(window.history, "back").mockImplementation(() => {});
+    const user = userEvent.setup();
+    renderTab(STAFF);
+    await user.click(await screen.findByRole("button", { name: "Hapus brief.pdf" }));
+    const modal = await screen.findByTestId("confirm-delete-file-modal");
+    await user.click(within(modal).getByRole("button", { name }));
+    expect(back).toHaveBeenCalledTimes(1);
+    back.mockRestore();
+  });
+
   it("wraps a 255-char file name with break-all", async () => {
     const name = `${"a".repeat(251)}.pdf`;
     attachmentActions.listAttachmentsAction.mockResolvedValue([attachment({ file_name: name })]);

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormDraft } from "@mono/hooks/form-draft";
 import { useModalParam } from "@mono/hooks/next";
-import { DynamicModal, FloatingInput, FloatingTextarea, Form } from "@mono/ui";
+import { DynamicModal, FloatingInput, FloatingTextarea, Form, FormDatePicker } from "@mono/ui";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 
@@ -73,7 +73,12 @@ export function MilestoneFormModal({ project }: { project: Project }) {
         <form onSubmit={submit} className="space-y-4">
           <FloatingInput control={form.control} name="title" label="Judul" />
           <FloatingTextarea control={form.control} name="description" label="Deskripsi" />
-          <FloatingInput control={form.control} name="due_date" label="Tenggat" type="date" />
+          <FormDatePicker
+            control={form.control}
+            name="due_date"
+            label="Tenggat"
+            testId="milestone-due-date"
+          />
           <FormActions
             onCancel={close}
             pending={mutation.isPending}

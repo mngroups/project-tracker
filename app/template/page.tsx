@@ -1,3 +1,4 @@
+import { Button } from "@mono/ui";
 import {
   ArrowRight,
   Database,
@@ -73,13 +74,12 @@ export default function TemplatePage() {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 md:px-8">
           <span className="text-sm font-semibold tracking-wide">MONEXA / APP TEMPLATE</span>
-          <Link
-            href="/login"
-            className="inline-flex min-h-10 items-center gap-2 rounded-md px-3 text-sm font-medium hover:bg-muted"
-          >
-            Masuk ke aplikasi
-            <ArrowRight aria-hidden className="size-4" />
-          </Link>
+          <Button asChild variant="ghost" className="min-h-10">
+            <Link href="/login">
+              Masuk ke aplikasi
+              <ArrowRight aria-hidden className="size-4" />
+            </Link>
+          </Button>
         </div>
       </header>
 
@@ -97,19 +97,15 @@ export default function TemplatePage() {
               dan tooling agar tim bisa fokus membangun fitur produk.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link
-                href="/login"
-                className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-90"
-              >
-                Jelajahi aplikasi
-                <ArrowRight aria-hidden className="size-4" />
-              </Link>
-              <Link
-                href="#kemampuan"
-                className="inline-flex min-h-11 items-center rounded-md border border-border px-5 py-3 text-sm font-medium hover:bg-muted"
-              >
-                Lihat kemampuan
-              </Link>
+              <Button asChild className="min-h-11 px-5">
+                <Link href="/login">
+                  Jelajahi aplikasi
+                  <ArrowRight aria-hidden className="size-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="min-h-11 px-5">
+                <Link href="#kemampuan">Lihat kemampuan</Link>
+              </Button>
             </div>
           </div>
 

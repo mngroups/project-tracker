@@ -1,17 +1,16 @@
 "use client";
 
-import { Tabs, TabsList, TabsTrigger } from "@mono/ui";
-import { cn } from "@mono/utils";
+import { TabBar } from "@mono/ui";
 import { useSearchParams } from "next/navigation";
 
 export const PROJECT_TABS = ["ringkasan", "milestone", "file"] as const;
 export type ProjectTab = (typeof PROJECT_TABS)[number];
 
-const TAB_LABEL: Record<ProjectTab, string> = {
-  ringkasan: "Ringkasan",
-  milestone: "Milestone",
-  file: "File",
-};
+const TAB_ITEMS = [
+  { key: "ringkasan", label: "Ringkasan" },
+  { key: "milestone", label: "Milestone" },
+  { key: "file", label: "File" },
+] as const satisfies readonly { key: ProjectTab; label: string }[];
 
 const isTab = (value: string | null): value is ProjectTab =>
   PROJECT_TABS.includes(value as ProjectTab);
@@ -36,19 +35,14 @@ export function ProjectTabs({
   value: ProjectTab;
   onChange: (tab: ProjectTab) => void;
 }) {
+  // TabBar, not Tabs: the page swaps its own content, so only the tab strip is rendered.
   return (
-    <Tabs value={value} onValueChange={(v) => onChange(v as ProjectTab)}>
-      <TabsList
-        variant="line"
-        aria-label="Bagian project"
-        className={cn("w-full flex-nowrap justify-start overflow-x-auto")}
-      >
-        {PROJECT_TABS.map((key) => (
-          <TabsTrigger key={key} value={key} className="min-h-10 shrink-0 px-4">
-            {TAB_LABEL[key]}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
+    <TabBar
+      items={TAB_ITEMS}
+      active={value}
+      onChange={onChange}
+      bleed
+      aria-label="Bagian project"
+    />
   );
 }

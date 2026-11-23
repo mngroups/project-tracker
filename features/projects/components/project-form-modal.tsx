@@ -3,7 +3,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormDraft } from "@mono/hooks/form-draft";
 import { useModalToggle } from "@mono/hooks/next";
-import { DynamicModal, FloatingInput, FloatingSelect, FloatingTextarea, Form } from "@mono/ui";
+import {
+  DynamicModal,
+  FloatingInput,
+  FloatingSelect,
+  FloatingTextarea,
+  Form,
+  FormDatePicker,
+} from "@mono/ui";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 
@@ -90,13 +97,13 @@ export function ProjectFormModal({ mode, project }: ProjectFormModalProps) {
   return (
     <DynamicModal
       open={open}
-      // Opening goes through the URL, so the modal only ever reports a close.
+      // Opening goes through the URL, so the modal only ever reports a close. Batal and ×
+      // also land here: no `onCancel`, or the close (history.back) would run twice.
       onOpenChange={close}
       title={mode === "edit" ? "Edit Project" : "Buat Project"}
       confirmLabel="Simpan"
       cancelLabel="Batal"
       onConfirm={submit}
-      onCancel={close}
       confirmDisabled={!(isValid && isDirty)}
       loading={mutation.isPending}
       testId="project-form-modal"
@@ -119,17 +126,17 @@ export function ProjectFormModal({ mode, project }: ProjectFormModalProps) {
               label="Kesehatan"
               options={HEALTH_OPTIONS}
             />
-            <FloatingInput
+            <FormDatePicker
               control={form.control}
               name="start_date"
               label="Tanggal mulai"
-              type="date"
+              testId="project-start-date"
             />
-            <FloatingInput
+            <FormDatePicker
               control={form.control}
               name="target_date"
               label="Tanggal target"
-              type="date"
+              testId="project-target-date"
             />
           </div>
         </form>
