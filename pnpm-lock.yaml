@@ -18,8 +18,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0(next@16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)(zustand@5.1.0(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)))
       '@mono/ui':
-        specifier: ^0.2.0
-        version: 0.2.0(@tanstack/react-query@5.101.0(react@19.3.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(d3-scale@4.0.3)(docx-preview@0.4.1)(heic-to@1.6.7)(next@16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pdfjs-dist@6.5.438)(react-dom@19.3.1(react@19.3.1))(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(react-markdown@10.1.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)(recharts@2.15.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(remark-gfm@4.0.1)(zustand@5.1.0(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)))
+        specifier: ^0.2.1
+        version: 0.2.1(@tanstack/react-query@5.101.0(react@19.3.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(d3-scale@4.0.3)(docx-preview@0.4.1)(heic-to@1.6.7)(next@16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pdfjs-dist@6.5.438)(react-dom@19.3.1(react@19.3.1))(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(react-markdown@10.1.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)(recharts@2.15.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(remark-gfm@4.0.1)(zustand@5.1.0(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)))
       '@mono/utils':
         specifier: ^0.2.0
         version: 0.2.0
@@ -573,6 +573,11 @@ packages:
       next: '>=16'
       react: '>=19'
       zod: ^4.0.0
+    peerDependenciesMeta:
+      next:
+        optional: true
+      react:
+        optional: true
 
   '@mono/hooks@0.2.0':
     resolution: {integrity: sha1-VdJWctcNx9fy7fPrHU7abVdAQF8=, tarball: https://gitlab.com/api/v4/projects/89199810/packages/npm/@mono/hooks/-/@mono/hooks-0.2.0.tgz}
@@ -582,9 +587,16 @@ packages:
       react: '>=19'
       react-hook-form: ^7.60.0
       zustand: ^5.0.0
+    peerDependenciesMeta:
+      next:
+        optional: true
+      react-hook-form:
+        optional: true
+      zustand:
+        optional: true
 
-  '@mono/ui@0.2.0':
-    resolution: {integrity: sha1-P++8D4EpU9s3odeNQ+DxwBRHJ+8=, tarball: https://gitlab.com/api/v4/projects/89199831/packages/npm/@mono/ui/-/@mono/ui-0.2.0.tgz}
+  '@mono/ui@0.2.1':
+    resolution: {integrity: sha1-QZ2GXUU2BVcPZpoFxaYF8cqG5Tg=, tarball: https://gitlab.com/api/v4/projects/89199831/packages/npm/@mono/ui/-/@mono/ui-0.2.1.tgz}
     engines: {node: '>=24 <25'}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
@@ -5444,20 +5456,22 @@ snapshots:
 
   '@mono/auth@0.2.0(next@16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)(zod@4.6.7)':
     dependencies:
-      next: 16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      react: 19.3.1
       server-only: 0.0.1
       zod: 4.6.7
+    optionalDependencies:
+      next: 16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      react: 19.3.1
 
   '@mono/hooks@0.2.0(next@16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)(zustand@5.1.0(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)))':
     dependencies:
       '@mono/utils': 0.2.0
-      next: 16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react: 19.3.1
+    optionalDependencies:
+      next: 16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react-hook-form: 7.92.0(@types/react@19.3.0)(react@19.3.1)
       zustand: 5.1.0(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
 
-  '@mono/ui@0.2.0(@tanstack/react-query@5.101.0(react@19.3.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(d3-scale@4.0.3)(docx-preview@0.4.1)(heic-to@1.6.7)(next@16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pdfjs-dist@6.5.438)(react-dom@19.3.1(react@19.3.1))(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(react-markdown@10.1.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)(recharts@2.15.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(remark-gfm@4.0.1)(zustand@5.1.0(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)))':
+  '@mono/ui@0.2.1(@tanstack/react-query@5.101.0(react@19.3.1))(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(d3-scale@4.0.3)(docx-preview@0.4.1)(heic-to@1.6.7)(next@16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(pdfjs-dist@6.5.438)(react-dom@19.3.1(react@19.3.1))(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(react-markdown@10.1.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)(recharts@2.15.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(remark-gfm@4.0.1)(zustand@5.1.0(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)))':
     dependencies:
       '@mono/hooks': 0.2.0(next@16.4.6(@babel/core@7.29.13)(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-hook-form@7.92.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)(zustand@5.1.0(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)))
       '@mono/utils': 0.2.0

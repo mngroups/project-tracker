@@ -10,6 +10,7 @@ import {
   FloatingInput,
   Form,
   FormControl,
+  FormDatePicker,
   FormField,
   FormItem,
   FormLabel,
@@ -90,7 +91,12 @@ export function TaskFormModal({ project }: { project: Project }) {
         <form onSubmit={submit} className="space-y-4">
           <FloatingInput control={form.control} name="title" label="Judul" />
           <FloatingInput control={form.control} name="assignee_name" label="Penanggung jawab" />
-          <FloatingInput control={form.control} name="due_date" label="Tenggat" type="date" />
+          <FormDatePicker
+            control={form.control}
+            name="due_date"
+            label="Tenggat"
+            testId="task-due-date"
+          />
           {canSeeInternal && (
             <FormField
               control={form.control}

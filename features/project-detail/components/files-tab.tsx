@@ -161,7 +161,6 @@ export function FilesTab({ project }: { project: Project }) {
         confirmLabel="Hapus"
         loading={remove.isPending}
         onConfirm={() => modal?.target && remove.mutate(modal.target, { onSuccess: closeModal })}
-        onCancel={closeModal}
         testId="confirm-delete-file-modal"
       />
     </div>

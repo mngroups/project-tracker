@@ -37,7 +37,6 @@ export function ConfirmDeleteModal({ project }: { project: Project }) {
       confirmLabel="Hapus"
       loading={mutation.isPending}
       onConfirm={() => mutation.mutate(id, { onSuccess: closeModal })}
-      onCancel={closeModal}
       testId="confirm-delete-modal"
     />
   );

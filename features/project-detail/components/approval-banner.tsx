@@ -2,7 +2,7 @@
 
 import { useCan } from "@mono/auth/react";
 import { useModalParam } from "@mono/hooks/next";
-import { Button } from "@mono/ui";
+import { Button, InfoNote } from "@mono/ui";
 import { ClipboardCheck } from "lucide-react";
 
 import type { Project } from "@/features/projects/schema";
@@ -35,17 +35,20 @@ export function ApprovalBanner({
   };
 
   return (
-    <div
+    <InfoNote
+      type="warning"
       data-testid="approval-banner"
-      className="flex min-w-0 flex-col gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <p className="flex min-w-0 items-center gap-2 text-sm font-medium break-words">
-        <ClipboardCheck className="size-4 shrink-0" />
-        {awaiting.length} milestone menunggu persetujuan Anda
-      </p>
-      <Button className="min-h-10" onClick={review}>
-        Tinjau
-      </Button>
-    </div>
+      description={
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="flex min-w-0 items-center gap-2 font-medium break-words">
+            <ClipboardCheck className="size-4 shrink-0" />
+            {awaiting.length} milestone menunggu persetujuan Anda
+          </p>
+          <Button className="min-h-10" onClick={review}>
+            Tinjau
+          </Button>
+        </div>
+      }
+    />
   );
 }

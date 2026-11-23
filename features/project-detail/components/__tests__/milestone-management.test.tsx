@@ -1,8 +1,10 @@
 import { PermissionsProvider } from "@mono/auth/react";
+import { witaDateString } from "@mono/utils";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { pickDate } from "@/test-utils/date-picker";
 import { renderWithProviders } from "@/test-utils/render";
 
 const getProjectAction = vi.fn();
@@ -209,6 +211,18 @@ describe("milestone manage menu", () => {
       expect(milestoneActions.deleteMilestoneAction).toHaveBeenCalledWith("p1", "m2")
     );
   });
+
+  it.each(["Batal", "Tutup"])("%s on the delete confirmation goes back only once", async (name) => {
+    const back = vi.spyOn(window.history, "back").mockImplementation(() => {});
+    const user = userEvent.setup();
+    renderPage();
+    await openMenu(user, "Bangun");
+    await user.click(await screen.findByRole("menuitem", { name: "Hapus" }));
+    const dialog = await screen.findByTestId("confirm-delete-modal");
+    await user.click(within(dialog).getByRole("button", { name }));
+    expect(back).toHaveBeenCalledTimes(1);
+    back.mockRestore();
+  });
 });
 
 describe("task form", () => {
@@ -248,6 +262,23 @@ describe("task form", () => {
         "p1",
         "m2",
         expect.objectContaining({ title: "Tulis tes", is_internal: false })
+      )
+    );
+  });
+
+  it("sends the due date picked in the date picker", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    const modal = await openTaskForm(user);
+    await user.type(within(modal).getByLabelText("Judul"), "Tulis tes");
+    await pickDate(user, "task-due-date", 15);
+    expect(screen.getByTestId("task-due-date")).not.toHaveTextContent("Pilih tanggal");
+    await user.click(within(modal).getByRole("button", { name: "Simpan" }));
+    await waitFor(() =>
+      expect(taskActions.createTaskAction).toHaveBeenCalledWith(
+        "p1",
+        "m2",
+        expect.objectContaining({ due_date: `${witaDateString().slice(0, 7)}-15` })
       )
     );
   });

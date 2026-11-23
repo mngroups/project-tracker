@@ -3,6 +3,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { pickDate } from "@/test-utils/date-picker";
 import { renderWithProviders } from "@/test-utils/render";
 import type { Project } from "../../schema";
 
@@ -83,8 +84,9 @@ describe("ProjectFormModal (create)", () => {
     renderWithProviders(<ProjectFormModal mode="create" />);
     await userEvent.type(await screen.findByLabelText("Kode"), "A");
     await userEvent.type(screen.getByLabelText("Nama"), "B");
-    fireEvent.change(screen.getByLabelText("Tanggal mulai"), { target: { value: "2026-05-01" } });
-    fireEvent.change(screen.getByLabelText("Tanggal target"), { target: { value: "2026-04-01" } });
+    const user = userEvent.setup();
+    await pickDate(user, "project-start-date", 15);
+    await pickDate(user, "project-target-date", 10);
     expect(await screen.findByText("Tanggal target harus setelah tanggal mulai")).toBeVisible();
     expect(screen.getByRole("button", { name: "Simpan" })).toBeDisabled();
   });
@@ -95,6 +97,15 @@ describe("ProjectFormModal (create)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Batal" }));
     await waitFor(() => expect(window.location.search).not.toContain("modal=project-form"));
     expect(readFormDraft("project-form:create")).toBeNull();
+  });
+
+  it.each(["Batal", "Tutup"])("%s goes back in history only once", async (name) => {
+    window.history.pushState({ __monexaModal: true }, "", "/?modal=project-form");
+    const back = vi.spyOn(window.history, "back").mockImplementation(() => {});
+    renderWithProviders(<ProjectFormModal mode="create" />);
+    fireEvent.click(await screen.findByRole("button", { name }));
+    expect(back).toHaveBeenCalledTimes(1);
+    back.mockRestore();
   });
 });
 
@@ -109,8 +120,8 @@ describe("ProjectFormModal (edit)", () => {
     renderWithProviders(<ProjectFormModal mode="edit" project={project} />);
     expect(await screen.findByText("Edit Project")).toBeInTheDocument();
     expect(screen.getByLabelText("Kode")).toHaveValue("PRJ-1");
-    expect(screen.getByLabelText("Tanggal mulai")).toHaveValue("2026-01-01");
-    expect(screen.getByLabelText("Tanggal target")).toHaveValue("");
+    expect(screen.getByTestId("project-start-date")).toHaveTextContent("01 Jan 2026");
+    expect(screen.getByTestId("project-target-date")).toHaveTextContent("Pilih tanggal");
 
     await userEvent.type(screen.getByLabelText("Nama"), " 2");
     const save = screen.getByRole("button", { name: "Simpan" });
