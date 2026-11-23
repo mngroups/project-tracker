@@ -37,6 +37,45 @@ The backend lives in `../project-tracker-api`.
 4. Before a PR, check `/projects` and every tab of `/projects/[id]` at 360px and 390px in
    Chrome DevTools: no horizontal scroll, sticky footers clear the safe area.
 
+### Sign in with monexa-auth (sso)
+
+Instead of the dev issuer, sign in through the central auth service. `pnpm dev:issuer` and
+monexa-auth both listen on port 9000, so run only one of them.
+
+1. Start `../monexa-auth` and `../monexa-auth-admin` (see their READMEs), then sign in to the
+   admin UI as a platform admin.
+2. **Apps → new app:**
+   - client id `project-tracker`;
+   - redirect URI `http://localhost:3000/auth/callback`;
+   - post-logout redirect URI `http://localhost:3000/login`;
+   - grant `authorization_code`.
+
+   Copy the client secret. It is shown only once (rotate it from the app page if you lose it).
+3. **Permission catalog** of the app: `project:all`, `project:view`, `project:manage`,
+   `project.task:update`, `project.milestone:approve`, `project.attachment:upload`,
+   `project.internal:view`.
+4. **Roles** of the app:
+   - Project Manager = `project:all`;
+   - Team Member = `project:view`, `project.task:update`, `project.attachment:upload`,
+     `project.internal:view`;
+   - Client = `project:view`, `project.milestone:approve`, `project.attachment:upload`.
+5. **Orgs:** create one org per client company, enable `project-tracker` for it, and add the
+   members with their roles. Internal staff join every client org they work on.
+6. **API** (`../project-tracker-api/.env`):
+
+   ```dotenv
+   AUTH_MODE=sso
+   AUTH_ISSUER=http://localhost:9000/oidc
+   AUTH_CLIENT_ID=project-tracker
+   AUTH_CLIENT_SECRET=<the secret from step 2>
+   AUTH_REDIRECT_URIS=http://localhost:3000/auth/callback
+   AUTH_POST_LOGOUT_REDIRECT_URI=http://localhost:3000/login
+   ```
+
+7. **Here** (`.env.local`): `AUTH_MODE=sso` and `AUTH_PORTAL_URL=http://localhost:9000`.
+   Restart both servers. `/login` now redirects to monexa-auth. The shell's org name switches
+   orgs, and "Keluar" ends the central session too.
+
 ## Use this template
 
 1. Click **Use this template** on GitHub (or copy the repo), then clone it.

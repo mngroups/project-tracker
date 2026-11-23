@@ -7,7 +7,12 @@ import { RestrictedPage } from "@/features/app-shell/components/restricted-page"
 import ProtectedPage from "@/features/auth/components/protected-page";
 import { COOKIES } from "@/lib/app-config";
 import { ROUTE_PERMISSIONS } from "@/lib/permissions/routes";
-import { canAccessRoute, getPermissions, resolveLandingRoute } from "@/lib/permissions/server";
+import {
+  canAccessRoute,
+  getActiveOrg,
+  getPermissions,
+  resolveLandingRoute,
+} from "@/lib/permissions/server";
 
 // Everything behind the session is internal.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -26,10 +31,11 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
   const allowed = !pathname || (await canAccessRoute(pathname));
   const permissions = await getPermissions();
   const hasAnyMenu = (await resolveLandingRoute()) !== null;
+  const { org, orgCount } = await getActiveOrg();
 
   return (
     <PermissionsProvider permissions={permissions} routes={ROUTE_PERMISSIONS}>
-      <AppShell defaultOpen={defaultOpen} userName={userName}>
+      <AppShell defaultOpen={defaultOpen} userName={userName} org={org} orgCount={orgCount}>
         <ProtectedPage>
           {allowed ? children : <RestrictedPage variant={hasAnyMenu ? "route" : "account"} />}
         </ProtectedPage>

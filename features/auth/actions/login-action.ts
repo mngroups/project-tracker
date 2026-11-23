@@ -1,6 +1,6 @@
 "use server";
 
-import { ApiError, AUTH_TIMEOUT_MS } from "@mono/auth";
+import { ApiError, AUTH_TIMEOUT_MS, reasonOf } from "@mono/auth";
 import { getErrorMessage } from "@mono/utils";
 import { cookies } from "next/headers";
 import { COOKIES } from "@/lib/app-config";
@@ -8,7 +8,9 @@ import { apiClient, setAuthCookies } from "@/lib/session";
 
 import { type LoginFormValues, loginResponseSchema } from "../schema";
 
-export type LoginResult = { success: true } | { success: false; message: string; status?: number };
+export type LoginResult =
+  | { success: true }
+  | { success: false; message: string; status?: number; reason?: string };
 
 /**
  * Exchanges credentials for tokens and stores them in HttpOnly cookies — the
@@ -28,7 +30,9 @@ export async function loginAction(values: LoginFormValues): Promise<LoginResult>
       },
       loginResponseSchema
     );
-    if (!res.success) return { success: false, message: res.message, status: res.code };
+    if (!res.success) {
+      return { success: false, message: res.message, status: res.code, reason: reasonOf(res) };
+    }
 
     const { access_token, refresh_token, expires_in, refresh_expires_in } = res.data;
     await setAuthCookies(access_token, refresh_token, expires_in, refresh_expires_in);
@@ -47,6 +51,7 @@ export async function loginAction(values: LoginFormValues): Promise<LoginResult>
       success: false,
       message: getErrorMessage(error),
       status: error instanceof ApiError ? error.status : undefined,
+      reason: reasonOf(error),
     };
   }
 }

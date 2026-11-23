@@ -11,14 +11,30 @@ const server = {
   canAccessRoute: vi.fn(),
   getPermissions: vi.fn(),
   resolveLandingRoute: vi.fn(),
+  getActiveOrg: vi.fn(),
 };
 vi.mock("@/lib/permissions/server", () => server);
 vi.mock("@/features/auth/components/protected-page", () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 vi.mock("@/features/app-shell/components/app-shell", () => ({
-  AppShell: ({ children, userName }: { children: React.ReactNode; userName: string }) => (
-    <div data-testid="app-shell" data-user-name={userName}>
+  AppShell: ({
+    children,
+    userName,
+    org,
+    orgCount,
+  }: {
+    children: React.ReactNode;
+    userName: string;
+    org: { name: string } | null;
+    orgCount: number;
+  }) => (
+    <div
+      data-testid="app-shell"
+      data-user-name={userName}
+      data-org={org?.name ?? ""}
+      data-org-count={orgCount}
+    >
       {children}
     </div>
   ),
@@ -31,6 +47,15 @@ describe("protected layout", () => {
     vi.clearAllMocks();
     server.getPermissions.mockResolvedValue(["project:view"]);
     server.resolveLandingRoute.mockResolvedValue("/projects");
+    server.getActiveOrg.mockResolvedValue({ org: { id: "o1", name: "PT A" }, orgCount: 2 });
+  });
+
+  it("hands the active org to the shell", async () => {
+    headersGet.mockReturnValue(null);
+    render(await ProtectedLayout({ children: <p>page</p> }));
+    const shell = screen.getByTestId("app-shell");
+    expect(shell).toHaveAttribute("data-org", "PT A");
+    expect(shell).toHaveAttribute("data-org-count", "2");
   });
 
   it("renders an allowed page", async () => {

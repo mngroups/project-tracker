@@ -38,6 +38,9 @@ afterEach(() => {
   // `clearAllFormDrafts()` saves its draft again and leaks into the next test.
   cleanup();
   window.history.replaceState(null, "", "/");
+  // @mono/hooks blocks a second modal `history.back()` until its popstate lands. A test
+  // that mocks `back()` never gets one, so settle it here or the next test can't close.
+  window.dispatchEvent(new PopStateEvent("popstate"));
   clearAllFormDrafts();
 });
 

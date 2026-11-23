@@ -1,9 +1,8 @@
+// Content-Security-Policy is set per request in proxy.ts (lib/security-headers.ts): its
+// form-action depends on AUTH_PORTAL_URL at runtime. Don't add a second CSP here — browsers
+// enforce every CSP header, so a stricter static one would still block the sso redirects.
 const SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
-  {
-    key: "Content-Security-Policy",
-    value: "frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'",
-  },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
 ];

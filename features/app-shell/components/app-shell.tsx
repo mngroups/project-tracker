@@ -6,18 +6,25 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import type { Org } from "@/features/auth/schema";
 import { APP_NAME, COOKIES } from "@/lib/app-config";
 
 import { MENU_ITEMS } from "../constants/menu-items";
+import { OrgSwitcher } from "./org-switcher";
 
 export function AppShell({
   children,
   defaultOpen,
   userName,
+  org = null,
+  orgCount = 0,
 }: {
   children: ReactNode;
   defaultOpen: boolean;
   userName: string;
+  /** The token's active org; null shows the app name. */
+  org?: Org | null;
+  orgCount?: number;
 }) {
   const pathname = usePathname();
   const { canAccessRoute } = usePermissions();
@@ -33,7 +40,7 @@ export function AppShell({
       bottomNav={bottomNav}
       pathname={pathname}
       linkComponent={Link}
-      brand={<span className="truncate font-semibold">{APP_NAME}</span>}
+      brand={<OrgSwitcher org={org} orgCount={orgCount} appName={APP_NAME} />}
       user={{ name: userName }}
       onLogout={logout}
       defaultOpen={defaultOpen}

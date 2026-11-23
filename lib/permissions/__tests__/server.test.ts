@@ -9,9 +9,12 @@ vi.mock("react", async (importOriginal) => ({
   cache: <T>(fn: T) => fn,
 }));
 vi.mock("@/features/auth/actions/auth-check.actions", () => ({ getAuthCheckAction }));
-vi.mock("@/lib/session", () => ({ hasSession }));
+const listOrgs = vi.fn();
+vi.mock("@/lib/session", () => ({ hasSession, authFlow: { listOrgs } }));
 
-const { can, canAccessRoute, getPermissions, resolveLandingRoute } = await import("../server");
+const { can, canAccessRoute, getActiveOrg, getPermissions, resolveLandingRoute } = await import(
+  "../server"
+);
 
 // The gate's own rules are tested in @mono/auth; this checks the app's wiring:
 // /v1/auth/check as the source, ROUTE_PERMISSIONS as the map, menu order as landing order.
@@ -39,5 +42,40 @@ describe("permissions/server", () => {
     hasSession.mockResolvedValue(false);
     expect(await getPermissions()).toBeNull();
     expect(getAuthCheckAction).not.toHaveBeenCalled();
+  });
+
+  it("reads the active org from the same check and counts the user's orgs", async () => {
+    const org = { id: "o1", name: "PT Maju Jaya" };
+    getAuthCheckAction.mockResolvedValue({ user_id: "u1", permissions: [], org });
+    listOrgs.mockResolvedValue([org, { id: "o2", name: "CV" }]);
+    expect(await getActiveOrg()).toEqual({ org, orgCount: 2 });
+  });
+
+  it("skips the org list when the token has no org", async () => {
+    getAuthCheckAction.mockResolvedValue({ user_id: "u1", permissions: [], org: null });
+    expect(await getActiveOrg()).toEqual({ org: null, orgCount: 0 });
+    expect(listOrgs).not.toHaveBeenCalled();
+  });
+
+  it("degrades to the plain brand when signed out or the BE fails", async () => {
+    hasSession.mockResolvedValue(false);
+    expect(await getActiveOrg()).toEqual({ org: null, orgCount: 0 });
+
+    hasSession.mockResolvedValue(true);
+    getAuthCheckAction.mockRejectedValue(new Error("down"));
+    expect(await getActiveOrg()).toEqual({ org: null, orgCount: 0 });
+
+    const org = { id: "o1", name: "A" };
+    getAuthCheckAction.mockResolvedValue({ user_id: "u1", permissions: [], org });
+    listOrgs.mockRejectedValue(new Error("down"));
+    expect(await getActiveOrg()).toEqual({ org, orgCount: 1 });
+  });
+
+  it("lets a session-expiry redirect through", async () => {
+    const redirect = Object.assign(new Error("NEXT_REDIRECT"), {
+      digest: "NEXT_REDIRECT;replace;/logout?reason=session_expired;307;",
+    });
+    getAuthCheckAction.mockRejectedValue(redirect);
+    await expect(getActiveOrg()).rejects.toBe(redirect);
   });
 });

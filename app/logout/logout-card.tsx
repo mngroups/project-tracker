@@ -18,7 +18,7 @@ export function LogoutCard({
         <AuthCardTitle>
           {isSessionExpired ? "Sesi Anda telah berakhir" : "Konfirmasi logout"}
         </AuthCardTitle>
-        <p className="mb-6 text-sm leading-6 text-gray-500">
+        <p className="mb-6 text-sm leading-6 text-muted-foreground">
           {isSessionExpired
             ? "Masuk kembali untuk melanjutkan pekerjaan Anda."
             : "Klik tombol di bawah untuk mengakhiri sesi di perangkat ini."}
