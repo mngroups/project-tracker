@@ -26,13 +26,13 @@ One breakpoint: Tailwind's **`md` (768px)**.
 
 ## Use the design-system mobile components (`@mono/ui`)
 
-| Desktop pattern  | Mobile counterpart                  | Notes                                              |
-| ---------------- | ----------------------------------- | -------------------------------------------------- |
-| `DataTable` list | `MobileCardList` + `MobileDataCard` | See `features/example/components/example-page.tsx` |
-| Dialog / modal   | `DynamicModal`                      | Bottom sheet on mobile, dialog on desktop          |
-| Popover / picker | `BottomSheet`                       | Drag-to-dismiss, safe-area padding                 |
-| Form action row  | `StickyFormFooter`                  | Pins Batal/Simpan to the bottom on mobile          |
-| Sidebar          | `Sidebar` (off-canvas on mobile)    | `features/app-shell/components/app-shell.tsx`      |
+| Desktop pattern  | Mobile counterpart                  | Notes                                                |
+| ---------------- | ----------------------------------- | ---------------------------------------------------- |
+| `DataTable` list | `MobileCardList` + `MobileDataCard` | See `features/projects/components/projects-page.tsx` |
+| Dialog / modal   | `DynamicModal`                      | Bottom sheet on mobile, dialog on desktop            |
+| Popover / picker | `BottomSheet`                       | Drag-to-dismiss, safe-area padding                   |
+| Form action row  | `StickyFormFooter`                  | Pins Batal/Simpan to the bottom on mobile            |
+| Sidebar          | `Sidebar` (off-canvas on mobile)    | `features/app-shell/components/app-shell.tsx`        |
 
 ## Layout rules
 

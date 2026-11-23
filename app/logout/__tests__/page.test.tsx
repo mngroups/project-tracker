@@ -16,13 +16,13 @@ describe("/logout page", () => {
   it("explains an expired session and wipes drafts on submit", async () => {
     render(
       await LogoutPage({
-        searchParams: Promise.resolve({ reason: "session_expired", next: "/example" }),
+        searchParams: Promise.resolve({ reason: "session_expired", next: "/projects" }),
       })
     );
     expect(screen.getByText("Sesi Anda telah berakhir")).toBeInTheDocument();
     const form = screen.getByTestId("logout-submit-button").closest("form") as HTMLFormElement;
     expect(form.getAttribute("action")).toBe(
-      "/logout/confirm?reason=session_expired&next=%2Fexample"
+      "/logout/confirm?reason=session_expired&next=%2Fprojects"
     );
     fireEvent.submit(form);
     expect(clearAllFormDrafts).toHaveBeenCalled();

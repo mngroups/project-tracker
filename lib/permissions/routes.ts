@@ -7,5 +7,5 @@ import type { RoutePermissions } from "@mono/auth";
  * post-login landing route. Reference leaf permissions here.
  */
 export const ROUTE_PERMISSIONS: RoutePermissions = {
-  "/example": ["example.item:view"],
+  "/projects": ["project:view"],
 };

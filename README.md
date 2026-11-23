@@ -1,9 +1,9 @@
-# Monexa App Template
+# Project Tracker
 
 Next.js 16 starter with the Monexa stack and conventions: App Router (Turbopack), React 19,
 TypeScript, Tailwind CSS v4, the MoNo design system (`@mono/ui`, built on shadcn/ui),
 `@mono/hooks`, `@mono/utils` and `@mono/auth`, TanStack Query v5, Zustand, Zod v4, react-hook-form,
-Biome and Vitest (100% coverage enforced).
+Biome and Vitest (80% coverage enforced).
 
 What you get out of the box:
 
@@ -19,11 +19,23 @@ What you get out of the box:
 - **File upload:** `FileUploadDropzone` + `useUploadQueue`: presigned browser → storage upload with
   per-file progress, retry and cancel ([guide](docs/guides/file-upload.md)).
 - **Feature flags:** typed registry plus `pnpm flag:new` / `pnpm flag:remove`.
-- **Reference feature:** `features/example/`, a list page with table and mobile cards, skeleton,
-  empty state, a URL-backed modal form with drafts, and a flag-gated action. Copy its shape for
+- **Reference feature:** `features/projects/`, a list page with table and mobile cards, skeleton,
+  empty state, a URL-backed modal form with drafts. Copy its shape for
   new features.
 - **Tooling:** Biome, husky (commit-msg + lint-staged), release-it, PR checks, a standalone
   Dockerfile.
+
+## Run locally with project-tracker-api
+
+The backend lives in `../project-tracker-api`.
+
+1. In the API repo: `pnpm dev:issuer` (dev auth on :9000), then Postgres + RustFS storage
+   (`docker compose up -d`), `pnpm db:migrate` and `pnpm dev` (API on :8080). See its README.
+2. Here: `.env.local` with `API_BASE_URL=http://localhost:8080`, then `pnpm dev`.
+3. Log in as `pm` / `pm123` (Project Manager), `member` / `member123` (Team Member) or
+   `client` / `client123` (Client), all in the dev org "PT Contoh Klien".
+4. Before a PR, check `/projects` and every tab of `/projects/[id]` at 360px and 390px in
+   Chrome DevTools: no horizontal scroll, sticky footers clear the safe area.
 
 ## Use this template
 
@@ -52,7 +64,7 @@ What you get out of the box:
    pnpm dev           # http://localhost:3000
    ```
 
-6. Replace `features/example/` with your first feature (see CLAUDE.md "Adding a New Feature")
+6. Add your next feature next to `features/projects/` (see CLAUDE.md "Adding a New Feature")
    and update the MoNo UI shell entries in `features/app-shell/constants/menu-items.ts` and
    `lib/permissions/routes.ts`.
 7. CI: add the `GITLAB_NPM_TOKEN` repository secret and `GITLAB_PACKAGE_GROUP_ID` Actions variable,

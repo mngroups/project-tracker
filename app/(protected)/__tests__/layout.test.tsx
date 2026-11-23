@@ -29,13 +29,13 @@ const { default: ProtectedLayout } = await import("../layout");
 describe("protected layout", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    server.getPermissions.mockResolvedValue(["example.item:view"]);
-    server.resolveLandingRoute.mockResolvedValue("/example");
+    server.getPermissions.mockResolvedValue(["project:view"]);
+    server.resolveLandingRoute.mockResolvedValue("/projects");
   });
 
   it("renders an allowed page", async () => {
     cookieGet.mockReturnValue({ value: "false" });
-    headersGet.mockReturnValue("/example");
+    headersGet.mockReturnValue("/projects");
     server.canAccessRoute.mockResolvedValue(true);
     render(await ProtectedLayout({ children: <p>page</p> }));
     expect(screen.getByText("page")).toBeInTheDocument();
@@ -56,14 +56,14 @@ describe("protected layout", () => {
   });
 
   it("shows the restricted page for a blocked route", async () => {
-    headersGet.mockReturnValue("/example");
+    headersGet.mockReturnValue("/projects");
     server.canAccessRoute.mockResolvedValue(false);
     render(await ProtectedLayout({ children: <p>page</p> }));
     expect(screen.getByText("Anda tidak memiliki akses ke halaman ini.")).toBeInTheDocument();
   });
 
   it("offers logout when no menu is reachable at all", async () => {
-    headersGet.mockReturnValue("/example");
+    headersGet.mockReturnValue("/projects");
     server.canAccessRoute.mockResolvedValue(false);
     server.resolveLandingRoute.mockResolvedValue(null);
     render(await ProtectedLayout({ children: <p>page</p> }));

@@ -22,8 +22,8 @@ describe("ProtectedPage", () => {
 
   it("redirects to /login carrying the requested page", async () => {
     cookieGet.mockReturnValue(undefined);
-    headersGet.mockReturnValue("/example");
+    headersGet.mockReturnValue("/projects");
     await ProtectedPage({ children: "content" });
-    expect(redirect).toHaveBeenCalledWith("/login?next=%2Fexample");
+    expect(redirect).toHaveBeenCalledWith("/login?next=%2Fprojects");
   });
 });

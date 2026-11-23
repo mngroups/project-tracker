@@ -13,9 +13,9 @@ describe("/ (landing)", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("redirects to the first reachable menu entry", async () => {
-    resolveLandingRoute.mockResolvedValue("/example");
+    resolveLandingRoute.mockResolvedValue("/projects");
     await Home();
-    expect(redirect).toHaveBeenCalledWith("/example");
+    expect(redirect).toHaveBeenCalledWith("/projects");
   });
 
   it("offers logout when nothing is reachable", async () => {
