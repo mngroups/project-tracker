@@ -24,22 +24,23 @@ Next.js 16 (App Router, Turbopack) frontend created from the Monexa app template
 
 ```
 app/
-├── (auth)/login/            # Unauthenticated routes
+├── (auth)/login/            # Unauthenticated routes (form, or SSO redirect / error card)
+├── auth/start, auth/callback/  # SSO route handlers (sso mode only; 404 otherwise)
 ├── (protected)/             # Requires a session; layout mounts the shell + route gate
 │   ├── layout.tsx
 │   └── projects/page.tsx    # Thin shell → features/projects
-├── logout/                  # Confirmation page + POST /logout/confirm (clears cookies)
+├── logout/                  # Confirmation page + POST /logout/confirm (revokes, clears cookies, central sign-out)
 ├── health/, version/
 ├── layout.tsx               # Root layout: theme script, <Providers>
 ├── providers.tsx            # ThemeProvider, QueryProvider, UiConfigProvider, Toaster
 └── page.tsx                 # "/" → first menu entry the user may open
 features/
-├── app-shell/               # Sidebar shell, menu items, RestrictedPage
-├── auth/                    # Login/logout actions, useAuth, LoginForm, ProtectedPage
+├── app-shell/               # Sidebar shell, menu items, OrgSwitcher, RestrictedPage
+├── auth/                    # Login/logout/org actions, useAuth, LoginForm, SsoErrorCard, ProtectedPage
 └── projects/                # Reference feature — copy its shape
 lib/
-├── app-config.ts            # APP_NAME, cookie prefix and names
-├── session.ts               # createSession(): apiClient, token cookies, endExpiredSession
+├── app-config.ts            # APP_NAME, cookie prefix and names, getAuthMode(), getAuthPortalUrl()
+├── session.ts               # createSession() + createAuthFlow(): apiClient, token cookies, authFlow
 ├── permissions/             # routes.ts (ROUTE_PERMISSIONS) + server.ts (createPermissionGate)
 ├── feature-flags/           # Flag registry + server/client readers
 └── query/                   # QueryClient defaults, Provider
@@ -57,7 +58,22 @@ Shared UI, hooks and helpers are **not** in this repo: they come from `@mono/ui`
 
 - `app/(auth)/` — unauthenticated pages.
 - `app/(protected)/` — the group's `layout.tsx` mounts `<AppShell>`, `<ProtectedPage>` and the permission route gate once. Pages stay **thin shells** that mount the feature's page component.
-- `proxy.ts` only does cheap cookie work: `/` → `/login` when signed out, `/login` → `/` when signed in, and sets the `x-pathname` header the protected layout uses for gating.
+- `proxy.ts` only does cheap cookie work: `/` → `/login` when signed out, `/login` → `/` when signed in, and sets the `x-pathname` header the protected layout uses for gating. `/auth/start` and `/auth/callback` must stay reachable both signed in and signed out — never add a redirect rule that catches them.
+
+### Auth modes and routes
+
+`AUTH_MODE` (`credentials` default | `sso`) is server-only and read at runtime; `AUTH_PORTAL_URL` is the monexa-auth origin.
+
+| Route                                  | credentials          | sso                                                                                                  |
+| -------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------- |
+| `/login`                               | form (`loginAction`) | → `/auth/start?next=…`; with `?error=` renders `SsoErrorCard`                                        |
+| `/auth/start`                          | 404                  | `authFlow.beginSsoLogin` → 307 to monexa-auth                                                        |
+| `/auth/callback`                       | 404                  | `authFlow.completeSsoLogin` → `next`, or `/login?error=<reason>`                                     |
+| `POST /logout/confirm`, `logoutAction` | revoke + clear       | also redirect to the provider's end-session URL (explicit logout only; a session expiry stays local) |
+- The SSO state/PKCE logic lives in `@mono/auth` (`createAuthFlow`). Fix it there, not here.
+- Refusal reasons come from the BE as `data.reason` (`reasonOf` from `@mono/auth`). Show the BE's message; on `/login?error=` only the known kit reasons may show `message`, everything else gets the generic copy.
+- **CSP is set per request in `proxy.ts`** (`lib/security-headers.ts`), not in `next.config.mjs`: in sso mode `form-action` must also allow the `AUTH_PORTAL_URL` origin, because browsers apply it to the redirects after a form submit (the logout forms end at monexa-auth). Never add a second, static CSP header.
+- Link to route handlers with a plain `<a>` (inside `Button asChild`), never `next/link`: a prefetch would run the handler.
 - Auth gating (`ProtectedPage`) is UX only; the BE re-checks every request.
 
 ---
@@ -115,13 +131,13 @@ Rules:
 
 ### `apiClient` ([lib/session.ts](lib/session.ts))
 
-Built by `createSession()` from `@mono/auth/server` with this app's cookie names and `API_BASE_URL`. Fix session behaviour in the `mono-auth` repo, not here. `lib/session.ts` is `server-only`, **not** `"use server"`: a `"use server"` module would expose every export (raw tokens included) as a browser-callable Server Action.
+Built by `createSession()` from `@mono/auth/server` with this app's cookie names and `API_BASE_URL`. `authFlow` (`createAuthFlow()`) shares its token store and handles SSO, logout and org switching. Fix session behaviour in the `mono-auth` repo, not here. `lib/session.ts` is `server-only`, **not** `"use server"`: a `"use server"` module would expose every export (raw tokens included) as a browser-callable Server Action.
 
 | Import from         | What                                                                                                 |
 | ------------------- | ---------------------------------------------------------------------------------------------------- |
 | `@mono/auth`        | `ApiError`, `apiEnvelope`, `wrapServerAction`, `isRedirectError`, `sanitizeNextPath`, `isGranted`, … |
 | `@mono/auth/react`  | `PermissionsProvider`, `usePermissions`, `useCan`, `<Can>`                                           |
-| `@mono/auth/server` | `createSession`, `createPermissionGate`, `assertSameOriginRequest` (server-only)                     |
+| `@mono/auth/server` | `createSession`, `createAuthFlow`, `createPermissionGate`, `assertSameOriginRequest` (server-only)   |
 - Base URL from `API_BASE_URL`; bearer token from the access-token cookie.
 - No access token but a refresh token → refreshes up-front. On 401 → one deduped refresh (keyed per session — never a module-level slot, the server process is shared by every user) and a retry.
 - A dead session (refresh rejected) redirects to `/logout?reason=session_expired` via `endExpiredSession()`. That throws `NEXT_REDIRECT`: never swallow it in a blanket `catch` (rethrow with `isRedirectError`).
@@ -200,7 +216,14 @@ Only for client-only state that outlives a component (UI filters, toggles). Serv
 
 ## Permissions (RBAC)
 
-Everything flows from `GET /v1/auth/check` → `{ user_id, permissions: string[] }`; the FE never hardcodes a catalog. A granted `:all` parent includes every descendant (`project:all` grants `project.task:update`).
+Everything flows from `GET /v1/auth/check` → `{ user_id, permissions: string[], org: { id, name } | null }`; the FE never hardcodes a catalog. Permissions belong to the token's **active org**.
+
+### Organizations
+
+- The active org comes from the check (`getActiveOrg()` in `lib/permissions/server.ts`, request-cached with the gate); the shell's `OrgSwitcher` shows it and switches via `switchOrgAction`, then reloads `/`.
+- **Never persist org-scoped data**: no org data in Zustand or `localStorage`. The switch reloads the page, which drops the in-memory React Query cache, so query keys need no org id; a persisted cache would need one.
+
+A granted `:all` parent includes every descendant (`project:all` grants `project.task:update`).
 
 | Concern                                      | Where                                                                         |
 | -------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -225,7 +248,7 @@ Trunk-based: unfinished user-facing work ships behind a flag (default `false`). 
 ## Testing
 
 - **Tests live in `__tests__/` next to the file under test.** Never co-locate `*.test.ts(x)`.
-- Mocks must match the real signature (e.g. `useAuth()` returns `{ login, isLoggingIn, logout, isLoggingOut }`).
+- Mocks must match the real signature (e.g. `useAuth()` returns `{ login, isLoggingIn, loginRefusal, logout, isLoggingOut }`).
 - Mock Server Actions, not `apiClient`, in component/hook tests. Server Action tests mock `@/lib/session`.
 - `renderWithProviders` (`test-utils/render.tsx`) wires QueryClient + Toaster.
 - `vitest.setup.tsx` mocks `next/navigation` (search params follow `window.location`), `next/headers`, `next/link`, `next/image`, `matchMedia` (desktop). For the mobile branch, mock `@mono/hooks` partially (`importOriginal`) with `useIsMobile: () => true`.
